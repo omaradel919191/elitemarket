@@ -2,8 +2,11 @@
 
 import { useEffect } from "react";
 import Lenis from "lenis";
+import { gsap } from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 
-/** Premium inertial scrolling. Disabled when the user prefers reduced motion. */
+/** Premium inertial scrolling, synced to GSAP ScrollTrigger so the cinematic
+ *  hero scrubs smoothly. Disabled when the user prefers reduced motion. */
 export function SmoothScroll() {
   useEffect(() => {
     if (
@@ -13,6 +16,8 @@ export function SmoothScroll() {
       return;
     }
 
+    gsap.registerPlugin(ScrollTrigger);
+
     const lenis = new Lenis({
       duration: 1.1,
       easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
@@ -20,15 +25,14 @@ export function SmoothScroll() {
       touchMultiplier: 1.5,
     });
 
-    let frame = 0;
-    const raf = (time: number) => {
-      lenis.raf(time);
-      frame = requestAnimationFrame(raf);
-    };
-    frame = requestAnimationFrame(raf);
+    lenis.on("scroll", ScrollTrigger.update);
+    const onTick = (time: number) => lenis.raf(time * 1000);
+    gsap.ticker.add(onTick);
+    gsap.ticker.lagSmoothing(0);
 
     return () => {
-      cancelAnimationFrame(frame);
+      gsap.ticker.remove(onTick);
+      lenis.off("scroll", ScrollTrigger.update);
       lenis.destroy();
     };
   }, []);
