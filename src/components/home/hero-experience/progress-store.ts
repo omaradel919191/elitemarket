@@ -44,6 +44,23 @@ export function band(
   return 1;
 }
 
+// Photoreal product images crystallize at each "formed" moment; the particle
+// cloud dims while a reveal is active so it reads as dust → real → dust.
+export const REVEAL_WINDOWS = [
+  { key: "watch", src: "/brand/products/watch.png", in0: 0.08, in1: 0.115, out0: 0.18, out1: 0.25 },
+  { key: "perfume", src: "/brand/products/perfume.png", in0: 0.3, in1: 0.335, out0: 0.4, out1: 0.47 },
+  { key: "sunglasses", src: "/brand/products/sunglasses.png", in0: 0.52, in1: 0.555, out0: 0.62, out1: 0.69 },
+  { key: "beauty", src: "/brand/products/beauty.png", in0: 0.74, in1: 0.775, out0: 0.84, out1: 0.91 },
+];
+
+export function revealStrength(p: number) {
+  let m = 0;
+  for (const w of REVEAL_WINDOWS) {
+    m = Math.max(m, band(p, w.in0, w.in1, w.out0, w.out1));
+  }
+  return m;
+}
+
 /** Resolve current segment + eased local mix from global progress. */
 export function resolveSegment(progress: number) {
   let i = 0;

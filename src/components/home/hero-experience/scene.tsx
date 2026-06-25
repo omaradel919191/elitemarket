@@ -5,7 +5,7 @@ import * as THREE from "three";
 import { useFrame, useThree } from "@react-three/fiber";
 import { EffectComposer, Bloom, Vignette } from "@react-three/postprocessing";
 import { buildShapes, type ShapeKey } from "./shapes";
-import { heroState, resolveSegment } from "./progress-store";
+import { heroState, resolveSegment, revealStrength } from "./progress-store";
 
 const SCATTER_AMP = 0.62;
 
@@ -39,13 +39,14 @@ const FRAG = /* glsl */ `
   precision mediump float;
   uniform vec3 uColorA;
   uniform vec3 uColorB;
+  uniform float uReveal;
   varying float vSeed;
   varying float vScatter;
   void main() {
     vec2 c = gl_PointCoord - 0.5;
     float d = length(c);
     if (d > 0.5) discard;
-    float alpha = smoothstep(0.5, 0.12, d) * 0.85;
+    float alpha = smoothstep(0.5, 0.12, d) * 0.85 * (1.0 - uReveal * 0.62);
     vec3 col = mix(uColorB, uColorA, vSeed);
     if (vSeed > 0.9) col = mix(col, vec3(1.0), 0.6);
     col += vScatter * 0.2;
@@ -87,6 +88,7 @@ function ParticleMorph({ count }: { count: number }) {
         uTime: { value: 0 },
         uColorA: { value: new THREE.Color("#f7e9b0") },
         uColorB: { value: new THREE.Color("#b8862b") },
+        uReveal: { value: 0 },
       },
       vertexShader: VERT,
       fragmentShader: FRAG,
@@ -118,6 +120,7 @@ function ParticleMorph({ count }: { count: number }) {
     }
     material.uniforms.uMix.value = seg.mix;
     material.uniforms.uScatter.value = seg.scatter * SCATTER_AMP;
+    material.uniforms.uReveal.value = revealStrength(heroState.progress);
     material.uniforms.uTime.value += delta;
 
     if (pointsRef.current) {
@@ -182,8 +185,8 @@ function Rig() {
 export function SceneContents({ count }: { count: number }) {
   return (
     <>
-      <color attach="background" args={["#08080a"]} />
-      <fog attach="fog" args={["#08080a", 5.5, 11]} />
+      <color attach="background" args={["#000000"]} />
+      <fog attach="fog" args={["#000000", 5.5, 11]} />
       <ParticleMorph count={count} />
       <AmbientDust />
       <Rig />

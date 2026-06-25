@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 import { Overlay } from "./overlay";
+import { ProductReveal } from "./product-reveal";
 import { HeroStatic } from "./hero-static";
 import { HERO_SCROLL_VH, heroState } from "./progress-store";
 
@@ -119,11 +120,12 @@ export function HeroExperience() {
       className="relative"
       aria-label="Elite Market cinematic experience"
     >
-      <div className="sticky top-0 h-dvh w-full overflow-hidden bg-ink">
+      <div className="sticky top-0 h-dvh w-full overflow-hidden bg-black">
         <ExperienceCanvas
           count={count}
           onContextLost={() => setMode("static")}
         />
+        <ProductReveal />
         <div className="spotlight pointer-events-none absolute inset-0 z-10" />
         <Overlay />
       </div>
