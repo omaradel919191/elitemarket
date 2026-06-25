@@ -1,5 +1,5 @@
 import { setRequestLocale } from "next-intl/server";
-import { HeroExperience } from "@/components/home/hero-experience";
+import { HeroCinematic } from "@/components/home/hero-cinematic";
 import { CategoryShowcase } from "@/components/home/category-showcase";
 import { HowItWorks } from "@/components/home/how-it-works";
 import { ValueProps } from "@/components/home/value-props";
@@ -15,7 +15,7 @@ export default async function HomePage({
 
   return (
     <>
-      <HeroExperience />
+      <HeroCinematic />
       <CategoryShowcase />
       <HowItWorks />
       <ValueProps />
