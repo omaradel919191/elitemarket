@@ -1,0 +1,107 @@
+{
+  "meta": {
+    "brand": "Elite Market",
+    "title": "Elite Market — Luxury Perfumes, Watches, Sunglasses & Beauty",
+    "description": "Discover Better. Shop Smarter. Handpicked luxury perfumes, watches, sunglasses and beauty products from trusted retailers — Amazon & Noon."
+  },
+  "nav": {
+    "shop": "Shop",
+    "perfumes": "Perfumes",
+    "watches": "Watches",
+    "sunglasses": "Sunglasses",
+    "beauty": "Beauty & Care",
+    "deals": "Deals",
+    "blog": "Journal",
+    "guides": "Buying Guides",
+    "about": "About",
+    "contact": "Contact",
+    "menu": "Menu",
+    "close": "Close",
+    "search": "Search products"
+  },
+  "hero": {
+    "eyebrow": "Curated Luxury · United Arab Emirates",
+    "titleLine1": "Discover Better.",
+    "titleLine2": "Shop Smarter.",
+    "subtitle": "Handpicked luxury perfumes, watches, sunglasses and beauty products from the world's most trusted retailers.",
+    "ctaPrimary": "Explore Products",
+    "ctaSecondary": "View Deals",
+    "scroll": "Scroll to explore",
+    "statProducts": "Curated Products",
+    "statCategories": "Luxury Categories",
+    "statRetailers": "Trusted Retailers"
+  },
+  "categories": {
+    "perfumes": { "name": "Perfumes", "tagline": "Signature scents & niche houses" },
+    "watches": { "name": "Watches", "tagline": "Mechanical precision, timeless design" },
+    "sunglasses": { "name": "Sunglasses", "tagline": "Iconic frames, pure presence" },
+    "beauty": { "name": "Beauty & Care", "tagline": "Elevated skincare & grooming" }
+  },
+  "home": {
+    "categoriesTitle": "Four Worlds of Luxury",
+    "categoriesSubtitle": "Every piece handpicked, reviewed, and linked to a retailer you already trust.",
+    "explore": "Explore",
+    "featuredTitle": "Editor's Selection",
+    "featuredSubtitle": "The pieces our curators are obsessing over right now.",
+    "howTitle": "How Elite Market Works",
+    "howSubtitle": "We don't sell. We curate — then send you to the best price.",
+    "step1Title": "We Curate",
+    "step1Body": "Our editors handpick only pieces worth your attention across perfumes, watches, eyewear and beauty.",
+    "step2Title": "You Compare",
+    "step2Body": "Read honest reviews, pros and cons, and who each piece is best for — no fluff.",
+    "step3Title": "You Buy Direct",
+    "step3Body": "One tap takes you to Amazon or Noon to buy at the best price. We never touch your payment.",
+    "trustTitle": "Why Shop With Elite Market",
+    "valueCuration": "Ruthless Curation",
+    "valueCurationBody": "Only the finest make the list.",
+    "valueHonest": "Honest Reviews",
+    "valueHonestBody": "Real pros, real cons, no hype.",
+    "valueTrusted": "Trusted Retailers",
+    "valueTrustedBody": "Buy via Amazon & Noon.",
+    "valueBilingual": "Arabic & English",
+    "valueBilingualBody": "A native experience in both.",
+    "ctaTitle": "Your next signature piece is waiting.",
+    "ctaBody": "Browse the full collection of curated luxury across four categories.",
+    "ctaButton": "Explore the Collection"
+  },
+  "product": {
+    "buyAmazon": "Buy on Amazon",
+    "buyNoon": "Buy on Noon",
+    "bestFor": "Best For",
+    "pros": "Pros",
+    "cons": "Cons",
+    "features": "Features",
+    "related": "You May Also Like",
+    "rating": "Rating",
+    "disclosureShort": "Affiliate link — we may earn a commission."
+  },
+  "newsletter": {
+    "title": "Join the Elite list",
+    "subtitle": "First access to new picks and the best deals. No spam.",
+    "placeholder": "Your email address",
+    "button": "Subscribe",
+    "success": "You're on the list."
+  },
+  "footer": {
+    "blurb": "A curated luxury discovery platform for perfumes, watches, sunglasses and beauty in the UAE.",
+    "explore": "Explore",
+    "company": "Company",
+    "legal": "Legal",
+    "about": "About",
+    "contact": "Contact",
+    "guides": "Buying Guides",
+    "blog": "Journal",
+    "disclosure": "Affiliate Disclosure",
+    "privacy": "Privacy Policy",
+    "terms": "Terms",
+    "rights": "All rights reserved.",
+    "disclosureNote": "Elite Market is an independent curation platform. We may earn a commission when you buy through our links, at no extra cost to you."
+  },
+  "common": {
+    "language": "Language",
+    "english": "English",
+    "arabic": "العربية",
+    "comingSoon": "Coming soon",
+    "empty": "Nothing here yet — check back soon."
+  }
+}

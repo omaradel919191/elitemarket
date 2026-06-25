@@ -1,26 +1,265 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+/* ============================================================
+   ELITE MARKET — Luxury Design System (Tailwind v4, CSS-first)
+   Brand: cinematic black + metallic gold + chrome/silver
+   ============================================================ */
+
+@theme {
+  /* ---- Brand color tokens ---- */
+  --color-ink: #08080a; /* deepest page black */
+  --color-night: #0b0b0f; /* base elevated black */
+  --color-primary: #0f172a; /* slate navy — primary surface */
+  --color-surface: #101218; /* card surface */
+  --color-surface-2: #161922; /* raised surface */
+
+  --color-gold: #d4af37; /* signature gold */
+  --color-gold-soft: #e7c766; /* hover / highlight gold */
+  --color-gold-deep: #a9842b; /* pressed / shadow gold */
+
+  --color-silver: #cbd2da; /* chrome silver (ELITE) */
+  --color-chrome: #eef2f7; /* near-white chrome */
+  --color-ash: #94a3b8; /* muted gray body text */
+  --color-ash-dim: #64748b; /* dimmest text */
+  --color-line: #1d2230; /* hairline borders */
+
+  --color-success: #34d399;
+  --color-danger: #f87171;
+
+  /* ---- Fonts (set per-locale on <html> via next/font vars) ---- */
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-body: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-cormorant), Georgia, "Times New Roman", serif;
+
+  /* ---- Radii ---- */
+  --radius-xl: 1.25rem;
+  --radius-2xl: 1.75rem;
+
+  /* ---- Easing ---- */
+  --ease-luxe: cubic-bezier(0.16, 1, 0.3, 1);
+
+  /* ---- Container ---- */
+  --breakpoint-3xl: 120rem;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+/* Arabic switches to dedicated Arabic display + body fonts */
+html[lang="ar"] {
+  --font-body: var(--font-tajawal), "Segoe UI", Tahoma, sans-serif;
+  --font-display: var(--font-el-messiri), "Segoe UI", Tahoma, sans-serif;
 }
 
-@media (prefers-color-scheme: dark) {
+@layer base {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    color-scheme: dark;
+  }
+
+  * {
+    border-color: var(--color-line);
+  }
+
+  html {
+    scroll-behavior: smooth;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
+  body {
+    background-color: var(--color-ink);
+    color: var(--color-chrome);
+    font-family: var(--font-body);
+    overflow-x: hidden;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  .font-display {
+    font-family: var(--font-display);
+    font-weight: 600;
+    letter-spacing: -0.01em;
+  }
+
+  html[lang="ar"] h1,
+  html[lang="ar"] h2,
+  html[lang="ar"] h3,
+  html[lang="ar"] h4,
+  html[lang="ar"] .font-display {
+    letter-spacing: 0;
+  }
+
+  ::selection {
+    background: var(--color-gold);
+    color: #0a0a0a;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-gold);
+    outline-offset: 2px;
+    border-radius: 2px;
+  }
+
+  /* Custom scrollbar */
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-track {
+    background: var(--color-ink);
+  }
+  ::-webkit-scrollbar-thumb {
+    background: linear-gradient(var(--color-gold-deep), #2a2a2a);
+    border-radius: 8px;
+    border: 2px solid var(--color-ink);
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(var(--color-gold), var(--color-gold-deep));
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+@layer utilities {
+  /* Metallic gold gradient text */
+  .text-gold-gradient {
+    background: linear-gradient(
+      180deg,
+      #f6e7a8 0%,
+      var(--color-gold) 42%,
+      var(--color-gold-deep) 100%
+    );
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: transparent;
+  }
+
+  /* Chrome / silver gradient text (ELITE) */
+  .text-chrome-gradient {
+    background: linear-gradient(
+      180deg,
+      #ffffff 0%,
+      #c8cfd8 48%,
+      #8b94a3 100%
+    );
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: transparent;
+  }
+
+  /* Hairline gold divider */
+  .gold-rule {
+    height: 1px;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      var(--color-gold) 50%,
+      transparent
+    );
+  }
+
+  /* Glass surface */
+  .glass {
+    background: color-mix(in srgb, var(--color-surface) 70%, transparent);
+    backdrop-filter: blur(16px) saturate(120%);
+    -webkit-backdrop-filter: blur(16px) saturate(120%);
+    border: 1px solid color-mix(in srgb, var(--color-gold) 14%, transparent);
+  }
+
+  /* Soft gold glow */
+  .glow-gold {
+    box-shadow:
+      0 0 0 1px color-mix(in srgb, var(--color-gold) 20%, transparent),
+      0 20px 60px -20px color-mix(in srgb, var(--color-gold) 35%, transparent);
+  }
+
+  /* Faint film grain overlay (use on a fixed div) */
+  .grain {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.4'/%3E%3C/svg%3E");
+  }
+
+  /* Radial vignette spotlight */
+  .spotlight {
+    background: radial-gradient(
+      60% 60% at 50% 30%,
+      color-mix(in srgb, var(--color-gold) 10%, transparent) 0%,
+      transparent 70%
+    );
+  }
+
+  .reveal-up {
+    opacity: 0;
+    transform: translateY(28px);
+  }
+
+  /* Animated gold sheen sweep */
+  @keyframes sheen {
+    0% {
+      background-position: -150% 0;
+    }
+    100% {
+      background-position: 250% 0;
+    }
+  }
+  .sheen {
+    background: linear-gradient(
+      110deg,
+      transparent 30%,
+      color-mix(in srgb, var(--color-gold) 55%, transparent) 50%,
+      transparent 70%
+    );
+    background-size: 250% 100%;
+    animation: sheen 6s var(--ease-luxe) infinite;
+  }
+
+  @keyframes float-y {
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-14px);
+    }
+  }
+  .float-slow {
+    animation: float-y 7s ease-in-out infinite;
+  }
+
+  @keyframes spin-slow {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+  .spin-slow {
+    animation: spin-slow 40s linear infinite;
+  }
+}
+
+/* Lenis smooth-scroll integration */
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+.lenis.lenis-smooth [data-lenis-prevent] {
+  overscroll-behavior: contain;
+}
+.lenis.lenis-stopped {
+  overflow: hidden;
+}
+
+/* Respect reduced motion globally */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
 }
