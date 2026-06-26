@@ -18,7 +18,7 @@ export async function GET(
   const link = product ? getRetailerLink(product, to) : undefined;
 
   if (!link) {
-    return NextResponse.redirect(new URL("/shop", req.nextUrl.origin), 302);
+    return NextResponse.redirect(new URL("/en/shop", req.nextUrl.origin), 302);
   }
 
   const dest = withAffiliate(link.url, to);

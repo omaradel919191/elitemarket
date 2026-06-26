@@ -1,0 +1,44 @@
+# Elite Market — production stack (isolated; reuses the host's Traefik).
+# No published host ports: Traefik routes to the container over the shared
+# network. Set DOMAIN / TRAEFIK_NETWORK / CERT_RESOLVER in .env to match the VPS.
+name: elitemarket-prod
+
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: elitemarket-web:latest
+    container_name: elitemarket-prod-web
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      NODE_ENV: production
+      PORT: "3000"
+      HOSTNAME: 0.0.0.0
+    expose:
+      - "3000"
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - -e
+        - "fetch('http://127.0.0.1:3000/').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 25s
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=${TRAEFIK_NETWORK:-n8n_default}"
+      - "traefik.http.routers.elitemarket.rule=Host(`${DOMAIN:-eliteperfumesuae.com}`) || Host(`www.${DOMAIN:-eliteperfumesuae.com}`)"
+      - "traefik.http.routers.elitemarket.entrypoints=websecure"
+      - "traefik.http.routers.elitemarket.tls=true"
+      - "traefik.http.routers.elitemarket.tls.certresolver=${CERT_RESOLVER:-letsencrypt}"
+      - "traefik.http.services.elitemarket.loadbalancer.server.port=3000"
+
+# Join the host's existing Traefik network (created outside this stack).
+networks:
+  default:
+    name: ${TRAEFIK_NETWORK:-n8n_default}
+    external: true

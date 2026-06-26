@@ -60,8 +60,8 @@ export async function generateMetadata({
     description: t("description"),
     applicationName: t("brand"),
     alternates: {
-      canonical: locale === "ar" ? "/ar" : "/",
-      languages: { en: "/", ar: "/ar", "x-default": "/" },
+      canonical: `/${locale}`,
+      languages: { en: "/en", ar: "/ar", "x-default": "/en" },
     },
     openGraph: {
       type: "website",
@@ -69,7 +69,7 @@ export async function generateMetadata({
       title: t("title"),
       description: t("description"),
       locale: locale === "ar" ? "ar_AE" : "en_US",
-      url: locale === "ar" ? "/ar" : "/",
+      url: `/${locale}`,
       images: [{ url: "/brand/cover.png", width: 1200, height: 630 }],
     },
     twitter: {
@@ -128,7 +128,7 @@ export default async function LocaleLayout({
             inLanguage: ["en", "ar"],
             potentialAction: {
               "@type": "SearchAction",
-              target: `${SITE.url}/search?q={search_term_string}`,
+              target: `${SITE.url}/en/search?q={search_term_string}`,
               "query-input": "required name=search_term_string",
             },
           }}

@@ -54,7 +54,7 @@ export default async function ProductPage({
   const tn = await getTranslations("nav");
   const l = localized(product, locale);
   const related = getRelated(product);
-  const lp = locale === "ar" ? "/ar" : "";
+  const lp = `/${locale}`;
 
   const productLd = {
     "@context": "https://schema.org",

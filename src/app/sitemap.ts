@@ -3,9 +3,9 @@ import { SITE, CATEGORIES } from "@/lib/site";
 import { getAllProducts } from "@/lib/catalog";
 
 /**
- * Sitemap with en/ar alternates. Default locale (en) is unprefixed, ar is
- * /ar-prefixed (next-intl localePrefix "as-needed"). Indexable routes only —
- * /search, /wishlist, /compare, /admin and /go are excluded (noindex).
+ * Sitemap with en/ar alternates. Both locales are prefixed (/en, /ar) under
+ * next-intl localePrefix "always". Indexable routes only — /search, /wishlist,
+ * /compare, /admin and /go are excluded (noindex).
  */
 export default function sitemap(): MetadataRoute.Sitemap {
   const base = SITE.url;
@@ -26,7 +26,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   ];
 
   return paths.map((path) => {
-    const en = `${base}${path || "/"}`;
+    const en = `${base}/en${path}`;
     const ar = `${base}/ar${path}`;
     return {
       url: en,

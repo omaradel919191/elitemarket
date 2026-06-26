@@ -15,7 +15,7 @@ const DEV_SECRET = "elite-market-dev-secret-change-me";
 
 const password = process.env.ADMIN_PASSWORD || DEV_PASSWORD;
 const secret = new TextEncoder().encode(
-  process.env.ADMIN_SESSION_SECRET || process.env.AUTH_JWT_SECRET || DEV_SECRET,
+  process.env.ADMIN_SESSION_SECRET || process.env.AUTH_SECRET || DEV_SECRET,
 );
 
 /** True when no ADMIN_PASSWORD is configured (insecure dev default in use). */
