@@ -21,15 +21,20 @@ import { createShipment, isOtoConfigured } from "@/lib/shipping/oto";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-function addr(a: Stripe.Address | null | undefined): Partial<ShippingAddress> {
-  if (!a) return {};
+/** Merge shipping + billing addresses field-by-field (shipping wins). */
+function mergeAddress(
+  shipping: Stripe.Address | null | undefined,
+  billing: Stripe.Address | null | undefined,
+): Partial<ShippingAddress> {
+  const pick = (k: keyof Stripe.Address) =>
+    (shipping?.[k] as string | null) || (billing?.[k] as string | null) || "";
   return {
-    line1: a.line1 ?? "",
-    line2: a.line2 ?? "",
-    city: a.city ?? "",
-    state: a.state ?? "",
-    country: a.country ?? "",
-    postalCode: a.postal_code ?? "",
+    line1: pick("line1"),
+    line2: pick("line2"),
+    city: pick("city"),
+    state: pick("state"),
+    country: pick("country"),
+    postalCode: pick("postal_code"),
   };
 }
 
@@ -95,7 +100,7 @@ export async function POST(req: NextRequest) {
     name: ship?.name || details?.name || "",
     email: details?.email || "",
     phone: details?.phone || "",
-    ...addr(ship?.address ?? details?.address),
+    ...mergeAddress(ship?.address, details?.address),
   };
 
   const order: Order = {
