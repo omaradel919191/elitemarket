@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Sparkles, Save, Trash2, Link2, Wand2 } from "lucide-react";
+import { Sparkles, Save, Trash2, Link2, Wand2, Upload } from "lucide-react";
 import { CATEGORIES } from "@/lib/site";
 import { getRetailerLink, type Product } from "@/lib/catalog-types";
 
@@ -28,6 +28,25 @@ export function ProductEditor({
   const [msg, setMsg] = useState("");
   const [genUrl, setGenUrl] = useState("");
   const [gen, setGen] = useState(false);
+  const [uploading, setUploading] = useState(false);
+
+  async function uploadImage(file: File) {
+    setUploading(true);
+    setMsg("");
+    try {
+      const fd = new FormData();
+      fd.append("file", file);
+      const res = await fetch("/api/admin/upload-image", { method: "POST", body: fd });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "upload failed");
+      set("image", data.url);
+      setMsg("Image uploaded.");
+    } catch (e) {
+      setMsg(e instanceof Error ? e.message : "Upload failed");
+    } finally {
+      setUploading(false);
+    }
+  }
 
   const [f, setF] = useState({
     slug: product?.slug ?? "",
@@ -288,9 +307,34 @@ export function ProductEditor({
             <label className={lbl}>Slug {mode === "edit" && "(fixed)"}</label>
             <input className={field} value={f.slug} onChange={(e) => set("slug", e.target.value)} readOnly={mode === "edit"} placeholder="auto from name" />
           </div>
-          <div>
-            <label className={lbl}>Image path</label>
-            <input className={field} value={f.image} onChange={(e) => set("image", e.target.value)} />
+          <div className="sm:col-span-2">
+            <label className={lbl}>Image</label>
+            <div className="flex items-center gap-3">
+              <span className="relative h-14 w-14 shrink-0 overflow-hidden rounded-lg border border-line bg-black">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={f.image} alt="" className="h-full w-full object-contain p-1" />
+              </span>
+              <input
+                className={field}
+                value={f.image}
+                onChange={(e) => set("image", e.target.value)}
+                placeholder="/media/…  or paste an image URL"
+              />
+              <label className="inline-flex h-11 shrink-0 cursor-pointer items-center gap-2 rounded-xl border border-line px-4 text-sm text-ash transition-colors hover:border-gold/40 hover:text-gold">
+                <Upload className="h-4 w-4" />
+                {uploading ? "Uploading…" : "Upload"}
+                <input
+                  type="file"
+                  accept="image/png,image/jpeg,image/webp,image/avif"
+                  className="hidden"
+                  onChange={(e) => {
+                    const fl = e.target.files?.[0];
+                    if (fl) void uploadImage(fl);
+                    e.target.value = "";
+                  }}
+                />
+              </label>
+            </div>
           </div>
           <div className="sm:col-span-2">
             <label className={lbl}>Short description (EN)</label>
