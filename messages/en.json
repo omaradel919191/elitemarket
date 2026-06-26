@@ -83,6 +83,18 @@
     "category": "Category",
     "bestFor": "Best for"
   },
+  "assistant": {
+    "fab": "Ask Elite",
+    "title": "Shopping Assistant",
+    "greeting": "Hi! Tell me what you're looking for — a gift, a budget, an occasion — and I'll suggest pieces.",
+    "placeholder": "e.g. a gift perfume under 400 AED",
+    "send": "Send",
+    "thinking": "Thinking…",
+    "view": "View",
+    "error": "Something went wrong. Please try again.",
+    "disclaimer": "AI-assisted suggestions from our catalog.",
+    "close": "Close assistant"
+  },
   "about": {
     "eyebrow": "Our Story",
     "title": "About Elite Market",

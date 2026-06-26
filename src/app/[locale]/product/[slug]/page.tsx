@@ -9,12 +9,14 @@ import { Reveal } from "@/components/ui/reveal";
 import { Rating } from "@/components/shop/rating";
 import { BuyButtons } from "@/components/shop/buy-buttons";
 import { ProductGrid } from "@/components/shop/product-grid";
+import { JsonLd } from "@/components/seo/json-ld";
 import {
   getAllProducts,
   getProduct,
   getRelated,
   localized,
 } from "@/lib/catalog";
+import { SITE } from "@/lib/site";
 import { formatAED } from "@/lib/utils";
 
 export function generateStaticParams() {
@@ -52,9 +54,59 @@ export default async function ProductPage({
   const tn = await getTranslations("nav");
   const l = localized(product, locale);
   const related = getRelated(product);
+  const lp = locale === "ar" ? "/ar" : "";
+
+  const productLd = {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    name: l.name,
+    image: `${SITE.url}${product.image}`,
+    description: l.blurb,
+    brand: { "@type": "Brand", name: product.brand },
+    category: tc(`${product.category}.name`),
+    ...(product.rating != null && {
+      aggregateRating: {
+        "@type": "AggregateRating",
+        ratingValue: product.rating,
+        bestRating: 5,
+        ratingCount: 1,
+      },
+    }),
+    ...(product.priceAed != null && {
+      offers: {
+        "@type": "AggregateOffer",
+        priceCurrency: "AED",
+        lowPrice: product.priceAed,
+        availability: "https://schema.org/InStock",
+        url: `${SITE.url}${lp}/product/${product.slug}`,
+      },
+    }),
+  };
+
+  const breadcrumbLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: tn("shop"), item: `${SITE.url}${lp}/shop` },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: tc(`${product.category}.name`),
+        item: `${SITE.url}${lp}/category/${product.category}`,
+      },
+      {
+        "@type": "ListItem",
+        position: 3,
+        name: l.name,
+        item: `${SITE.url}${lp}/product/${product.slug}`,
+      },
+    ],
+  };
 
   return (
     <article className="pt-28 pb-28 sm:pt-32">
+      <JsonLd data={productLd} />
+      <JsonLd data={breadcrumbLd} />
       <Container>
         {/* Breadcrumb */}
         <nav className="flex items-center gap-1.5 text-xs text-ash-dim">

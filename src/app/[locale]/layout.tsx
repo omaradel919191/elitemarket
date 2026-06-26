@@ -13,6 +13,9 @@ import { SiteHeader } from "@/components/layout/site-header";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { SmoothScroll } from "@/components/providers/smooth-scroll";
 import { AmbientGold } from "@/components/brand/ambient-gold";
+import { AssistantWidget } from "@/components/assistant/assistant-widget";
+import { JsonLd } from "@/components/seo/json-ld";
+import { SITE } from "@/lib/site";
 import "../globals.css";
 
 const inter = Inter({
@@ -67,11 +70,13 @@ export async function generateMetadata({
       description: t("description"),
       locale: locale === "ar" ? "ar_AE" : "en_US",
       url: locale === "ar" ? "/ar" : "/",
+      images: [{ url: "/brand/cover.png", width: 1200, height: 630 }],
     },
     twitter: {
       card: "summary_large_image",
       title: t("title"),
       description: t("description"),
+      images: ["/brand/cover.png"],
     },
     robots: { index: true, follow: true },
     icons: { icon: "/favicon.ico" },
@@ -100,6 +105,34 @@ export default async function LocaleLayout({
       suppressHydrationWarning
     >
       <body className="flex min-h-dvh flex-col bg-ink text-chrome antialiased">
+        <JsonLd
+          data={{
+            "@context": "https://schema.org",
+            "@type": "Organization",
+            name: SITE.name,
+            url: SITE.url,
+            logo: `${SITE.url}/brand/em-logo.png`,
+            sameAs: [
+              SITE.social.instagram,
+              SITE.social.youtube,
+              SITE.social.tiktok,
+            ],
+          }}
+        />
+        <JsonLd
+          data={{
+            "@context": "https://schema.org",
+            "@type": "WebSite",
+            name: SITE.name,
+            url: SITE.url,
+            inLanguage: ["en", "ar"],
+            potentialAction: {
+              "@type": "SearchAction",
+              target: `${SITE.url}/search?q={search_term_string}`,
+              "query-input": "required name=search_term_string",
+            },
+          }}
+        />
         <NextIntlClientProvider>
           <SmoothScroll />
           <AmbientGold />
@@ -110,6 +143,7 @@ export default async function LocaleLayout({
           <SiteHeader />
           <main className="relative z-10 flex-1">{children}</main>
           <SiteFooter />
+          <AssistantWidget />
         </NextIntlClientProvider>
       </body>
     </html>
