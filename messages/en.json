@@ -37,6 +37,24 @@
     "sunglasses": { "name": "Sunglasses", "tagline": "Iconic frames, pure presence" },
     "beauty": { "name": "Beauty & Care", "tagline": "Elevated skincare & grooming" }
   },
+  "shop": {
+    "title": "The Collection",
+    "subtitle": "Every piece handpicked across perfumes, watches, eyewear and beauty — linked to a retailer you already trust.",
+    "eyebrow": "Curated Luxury",
+    "all": "All",
+    "deal": "Deal",
+    "count": "{count, plural, =0 {No products} one {# product} other {# products}}"
+  },
+  "category": {
+    "eyebrow": "Category",
+    "browseAll": "Browse all products"
+  },
+  "deals": {
+    "eyebrow": "Limited Time",
+    "title": "Deals & Offers",
+    "subtitle": "Our curators' current picks at their best available prices.",
+    "empty": "No active deals right now — check back soon."
+  },
   "home": {
     "categoriesTitle": "Four Worlds of Luxury",
     "categoriesSubtitle": "Every piece handpicked, reviewed, and linked to a retailer you already trust.",
@@ -73,7 +91,11 @@
     "features": "Features",
     "related": "You May Also Like",
     "rating": "Rating",
-    "disclosureShort": "Affiliate link — we may earn a commission."
+    "deal": "Deal",
+    "whereToBuy": "Where to Buy",
+    "priceNote": "Indicative price — confirm the live price on the retailer's site.",
+    "disclosureShort": "Affiliate link — we may earn a commission.",
+    "affiliateNote": "We may earn a commission when you buy through these links, at no extra cost to you. We never process your payment — you check out securely on Amazon or Noon."
   },
   "newsletter": {
     "title": "Join the Elite list",
