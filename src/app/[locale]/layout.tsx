@@ -12,6 +12,7 @@ import { routing } from "@/i18n/routing";
 import { SiteHeader } from "@/components/layout/site-header";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { SmoothScroll } from "@/components/providers/smooth-scroll";
+import { AmbientGold } from "@/components/brand/ambient-gold";
 import "../globals.css";
 
 const inter = Inter({
@@ -101,6 +102,7 @@ export default async function LocaleLayout({
       <body className="flex min-h-dvh flex-col bg-ink text-chrome antialiased">
         <NextIntlClientProvider>
           <SmoothScroll />
+          <AmbientGold />
           <div
             aria-hidden
             className="grain pointer-events-none fixed inset-0 z-[1] opacity-[0.04] mix-blend-overlay"
