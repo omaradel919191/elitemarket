@@ -2,6 +2,7 @@ import Image from "next/image";
 import { ArrowUpRight } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import { Rating } from "./rating";
+import { WishlistButton } from "./wishlist-button";
 import { localized, type Product } from "@/lib/catalog";
 import { formatAED } from "@/lib/utils";
 
@@ -10,11 +11,13 @@ export function ProductCard({
   locale,
   dealLabel,
   categoryName,
+  wishlistLabels,
 }: {
   product: Product;
   locale: string;
   dealLabel: string;
   categoryName: string;
+  wishlistLabels: { add: string; remove: string };
 }) {
   const l = localized(product, locale);
 
@@ -36,7 +39,12 @@ export function ProductCard({
             {dealLabel}
           </span>
         )}
-        <span className="absolute top-3 rounded-full bg-black/50 px-2.5 py-1 text-[0.62rem] font-medium uppercase tracking-wide text-ash backdrop-blur-sm ltr:right-3 rtl:left-3">
+        <WishlistButton
+          slug={product.slug}
+          labels={wishlistLabels}
+          className="absolute top-3 ltr:right-3 rtl:left-3"
+        />
+        <span className="absolute bottom-3 rounded-full bg-black/50 px-2.5 py-1 text-[0.62rem] font-medium uppercase tracking-wide text-ash backdrop-blur-sm ltr:left-3 rtl:right-3">
           {categoryName}
         </span>
       </div>

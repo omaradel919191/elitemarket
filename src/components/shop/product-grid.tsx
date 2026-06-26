@@ -29,6 +29,7 @@ export function ProductGrid({
             locale={locale}
             dealLabel={t("shop.deal")}
             categoryName={t(`categories.${p.category}.name`)}
+            wishlistLabels={{ add: t("wishlist.add"), remove: t("wishlist.remove") }}
           />
         </Reveal>
       ))}

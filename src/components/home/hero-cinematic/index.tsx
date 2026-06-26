@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
-import { ArrowRight, ChevronDown, Volume2, VolumeX } from "lucide-react";
+import { ArrowRight, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { CLIPS, HERO_VH, heroProgress, band, smoothstep } from "./progress";
 import { HeroPoster } from "./fallback";
@@ -19,22 +19,6 @@ export function HeroCinematic() {
   const introRef = useRef<HTMLDivElement>(null);
   const cueRef = useRef<HTMLDivElement>(null);
   const finaleRef = useRef<HTMLDivElement>(null);
-  const audioRef = useRef<HTMLAudioElement>(null);
-  const [soundOn, setSoundOn] = useState(false);
-
-  function toggleSound() {
-    const a = audioRef.current;
-    if (!a) return;
-    if (soundOn) {
-      a.pause();
-      setSoundOn(false);
-    } else {
-      a.muted = false;
-      a.volume = 0.45;
-      void a.play().catch(() => {});
-      setSoundOn(true);
-    }
-  }
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -241,20 +225,6 @@ export function HeroCinematic() {
           </div>
         </div>
 
-        {/* Ambient audio + sound toggle (sound-ready: drop a track at the src) */}
-        <audio ref={audioRef} src="/brand/audio/ambient.mp3" loop preload="none" />
-        <button
-          type="button"
-          onClick={toggleSound}
-          aria-label={soundOn ? "Mute sound" : "Enable sound"}
-          className="absolute bottom-7 z-40 flex h-10 w-10 items-center justify-center rounded-full border border-gold/30 bg-black/40 text-gold backdrop-blur-sm transition-colors hover:border-gold/60 ltr:right-6 rtl:left-6"
-        >
-          {soundOn ? (
-            <Volume2 className="h-4 w-4" />
-          ) : (
-            <VolumeX className="h-4 w-4" />
-          )}
-        </button>
       </div>
     </section>
   );

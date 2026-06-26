@@ -55,6 +55,110 @@
     "subtitle": "Our curators' current picks at their best available prices.",
     "empty": "No active deals right now — check back soon."
   },
+  "search": {
+    "eyebrow": "Find Your Piece",
+    "title": "Search",
+    "placeholder": "Search perfumes, watches, eyewear, beauty…",
+    "prompt": "Start typing to search the collection.",
+    "empty": "No matches for \"{query}\". Try another term.",
+    "results": "{count, plural, =0 {No results} one {# result} other {# results}} for \"{query}\""
+  },
+  "wishlist": {
+    "eyebrow": "Saved",
+    "title": "Your Wishlist",
+    "subtitle": "The pieces you've saved to revisit.",
+    "empty": "Your wishlist is empty. Tap the heart on any product to save it.",
+    "browse": "Browse the collection",
+    "clear": "Clear all",
+    "add": "Save to wishlist",
+    "remove": "Remove from wishlist"
+  },
+  "compare": {
+    "eyebrow": "Side by Side",
+    "title": "Compare",
+    "subtitle": "Put your saved pieces side by side.",
+    "empty": "Add products to your wishlist, then compare them here.",
+    "price": "Price",
+    "rating": "Rating",
+    "category": "Category",
+    "bestFor": "Best for"
+  },
+  "about": {
+    "eyebrow": "Our Story",
+    "title": "About Elite Market",
+    "subtitle": "An independent luxury discovery platform for the UAE — we curate, you buy direct.",
+    "p1": "Elite Market is a curation platform, not a store. We don't hold inventory and we never process payments. Instead, our editors handpick the finest perfumes, watches, eyewear and beauty — then link you straight to trusted retailers like Amazon and Noon to buy at the best available price.",
+    "p2": "The luxury market is noisy. Thousands of products, inflated claims, and very little honesty about what's actually worth your money. We exist to cut through that — with a ruthless shortlist and reviews that name the trade-offs, not just the highlights.",
+    "p3": "Every link is an affiliate link. If you buy through us we may earn a small commission, at no extra cost to you. That keeps the platform free and our incentives simple: recommend only what we'd buy ourselves.",
+    "valuesTitle": "What we stand for",
+    "v1Title": "Ruthless curation",
+    "v1Body": "Only the finest make the list — quality over quantity, always.",
+    "v2Title": "Honest reviews",
+    "v2Body": "Real pros and cons. We tell you who a piece is for, and who it isn't.",
+    "v3Title": "You buy direct",
+    "v3Body": "We send you to Amazon or Noon. Your payment never touches us.",
+    "v4Title": "Bilingual by design",
+    "v4Body": "A native experience in both Arabic and English."
+  },
+  "contact": {
+    "eyebrow": "Get in Touch",
+    "title": "Contact Us",
+    "subtitle": "Questions, partnership ideas, or a product we should review? We'd love to hear from you.",
+    "emailTitle": "Email",
+    "emailNote": "We usually reply within two business days.",
+    "socialTitle": "Follow",
+    "socialNote": "For the latest picks and drops."
+  },
+  "blog": {
+    "eyebrow": "Journal",
+    "title": "The Journal",
+    "subtitle": "Guides, edits and stories from the world of curated luxury.",
+    "empty": "No articles yet — our first stories are on the way."
+  },
+  "guides": {
+    "eyebrow": "Buying Guides",
+    "title": "Buying Guides",
+    "subtitle": "Practical, honest guides to help you choose with confidence.",
+    "empty": "Our buying guides are being written — check back soon."
+  },
+  "disclosure": {
+    "eyebrow": "Transparency",
+    "title": "Affiliate Disclosure",
+    "subtitle": "How Elite Market makes money — in plain language.",
+    "updated": "Last updated: June 2026",
+    "body": [
+      "Elite Market is an independent curation platform. The product links on this site are affiliate links to retailers such as Amazon and Noon.",
+      "When you click a link and buy on the retailer's site, we may earn a small commission. This comes at no extra cost to you — you pay the same price you would have anyway.",
+      "We never process your payment or handle your card details. Every purchase is completed securely on the retailer's own website.",
+      "Affiliate commissions keep this platform free to use. They never change which products we recommend — our shortlist is based on quality and value, not commission rates.",
+      "Prices shown on Elite Market are indicative and may differ from the live price on the retailer's site. Always confirm the final price at checkout."
+    ]
+  },
+  "privacy": {
+    "title": "Privacy Policy",
+    "subtitle": "What we collect, and what we don't.",
+    "updated": "Last updated: June 2026",
+    "intro": "Elite Market respects your privacy. We collect as little data as possible and never sell it.",
+    "sections": [
+      { "h": "What we collect", "b": "We don't require accounts and we don't process payments, so we don't collect names, addresses or card details. If you subscribe to our newsletter, we store the email address you provide. We use privacy-respecting, aggregate analytics to understand which pages are useful." },
+      { "h": "Cookies", "b": "We use only essential cookies needed for the site to function and for language preference. We do not use intrusive advertising trackers." },
+      { "h": "Affiliate links", "b": "When you click a product link, the destination retailer (e.g. Amazon, Noon) may set its own cookies to attribute the referral. Their privacy policies govern that data once you leave our site." },
+      { "h": "Your choices", "b": "You can unsubscribe from the newsletter at any time using the link in any email. To request deletion of your email from our list, contact us." }
+    ]
+  },
+  "terms": {
+    "title": "Terms of Service",
+    "subtitle": "The basics of using Elite Market.",
+    "updated": "Last updated: June 2026",
+    "intro": "By using Elite Market you agree to these terms.",
+    "sections": [
+      { "h": "What we are", "b": "Elite Market is a curation and discovery platform. We are not a retailer. We do not sell products, hold inventory, process payments, or ship orders. All purchases happen on third-party retailer sites." },
+      { "h": "Affiliate links", "b": "Links on this site are affiliate links. We may earn a commission on qualifying purchases at no extra cost to you. See our Affiliate Disclosure for details." },
+      { "h": "Accuracy", "b": "We work to keep product information accurate, but prices, availability and specifications are set by the retailers and can change at any time. Always confirm details on the retailer's site before buying." },
+      { "h": "No warranty", "b": "Content on Elite Market is provided for information only and without warranty. Any purchase, and any product warranty or return, is solely between you and the retailer." },
+      { "h": "Intellectual property", "b": "The Elite Market name, brand and original content are ours. Product names and imagery belong to their respective owners." }
+    ]
+  },
   "home": {
     "categoriesTitle": "Four Worlds of Luxury",
     "categoriesSubtitle": "Every piece handpicked, reviewed, and linked to a retailer you already trust.",
