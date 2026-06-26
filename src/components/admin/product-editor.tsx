@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Sparkles, Save, Trash2 } from "lucide-react";
+import { Sparkles, Save, Trash2, Link2, Wand2 } from "lucide-react";
 import { CATEGORIES } from "@/lib/site";
 import { getRetailerLink, type Product } from "@/lib/catalog-types";
 
@@ -26,6 +26,8 @@ export function ProductEditor({
   const [busy, setBusy] = useState(false);
   const [ai, setBusyAi] = useState(false);
   const [msg, setMsg] = useState("");
+  const [genUrl, setGenUrl] = useState("");
+  const [gen, setGen] = useState(false);
 
   const [f, setF] = useState({
     slug: product?.slug ?? "",
@@ -98,6 +100,54 @@ export function ProductEditor({
     }
   }
 
+  async function generateFromUrl() {
+    const u = genUrl.trim();
+    if (!u || gen) return;
+    setGen(true);
+    setMsg("");
+    try {
+      const res = await fetch("/api/admin/generate-from-url", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ url: u }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "failed");
+      const d = data.draft ?? {};
+      setF((prev) => ({
+        ...prev,
+        name: d.name || prev.name,
+        nameAr: d.nameAr || prev.nameAr,
+        brand: d.brand || prev.brand,
+        category: d.category || prev.category,
+        blurb: d.blurb || prev.blurb,
+        blurbAr: d.blurbAr || prev.blurbAr,
+        priceAed: d.priceAed != null ? String(d.priceAed) : prev.priceAed,
+        badge: d.badge || prev.badge,
+        bestFor: d.bestFor || prev.bestFor,
+        bestForAr: d.bestForAr || prev.bestForAr,
+        pros: (d.pros ?? lines(prev.pros)).join("\n"),
+        prosAr: (d.prosAr ?? lines(prev.prosAr)).join("\n"),
+        cons: (d.cons ?? lines(prev.cons)).join("\n"),
+        consAr: (d.consAr ?? lines(prev.consAr)).join("\n"),
+        features: (d.features ?? lines(prev.features)).join("\n"),
+        featuresAr: (d.featuresAr ?? lines(prev.featuresAr)).join("\n"),
+        image: data.image || prev.image,
+        amazonUrl: data.retailer === "amazon" ? u : prev.amazonUrl,
+        noonUrl: data.retailer === "noon" ? u : prev.noonUrl,
+      }));
+      setMsg(
+        data.ai
+          ? `Generated from the ${data.retailer} link${data.fetched ? "" : " (page was blocked — please review)"}. Review and Save.`
+          : (data.note ?? "Filled from the page — complete the rest."),
+      );
+    } catch (e) {
+      setMsg(e instanceof Error ? e.message : "Could not read that link");
+    } finally {
+      setGen(false);
+    }
+  }
+
   async function save(e: React.FormEvent) {
     e.preventDefault();
     if (!f.name.trim() || busy) return;
@@ -164,6 +214,41 @@ export function ProductEditor({
 
   return (
     <form onSubmit={save} className="space-y-6">
+      {/* Generate from a product link */}
+      <div className="rounded-2xl border border-gold/25 bg-gold/[0.05] p-6">
+        <div className="flex items-center gap-2">
+          <Wand2 className="h-4 w-4 text-gold" />
+          <h2 className="font-display text-lg font-semibold text-chrome">
+            Generate from a product link
+          </h2>
+        </div>
+        <p className="mt-1 text-xs text-ash-dim">
+          Paste an Amazon or Noon product URL — the AI reads it and fills the
+          name, description, image, price, category and pros/cons. Then review
+          and Save. (The link is set as the affiliate link automatically.)
+        </p>
+        <div className="mt-4 flex flex-col gap-3 sm:flex-row">
+          <div className="relative flex-1">
+            <Link2 className="pointer-events-none absolute top-1/2 h-4 w-4 -translate-y-1/2 text-ash-dim ltr:left-3.5 rtl:right-3.5" />
+            <input
+              value={genUrl}
+              onChange={(e) => setGenUrl(e.target.value)}
+              placeholder="https://www.amazon.ae/dp/…  or  https://www.noon.com/…"
+              className="h-11 w-full rounded-xl border border-line bg-night/60 text-sm text-chrome focus:border-gold/50 focus:outline-none ltr:pl-10 ltr:pr-3.5 rtl:pr-10 rtl:pl-3.5"
+            />
+          </div>
+          <button
+            type="button"
+            onClick={generateFromUrl}
+            disabled={gen || !genUrl.trim()}
+            className="inline-flex h-11 shrink-0 items-center justify-center gap-2 rounded-full bg-gradient-to-b from-gold-soft to-gold-deep px-6 text-sm font-medium text-ink transition-transform hover:-translate-y-0.5 disabled:opacity-40"
+          >
+            <Sparkles className="h-4 w-4" />
+            {gen ? "Reading link…" : "Generate"}
+          </button>
+        </div>
+      </div>
+
       {/* Core */}
       <div className={card}>
         <div className="flex items-center justify-between">
