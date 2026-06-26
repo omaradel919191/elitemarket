@@ -87,6 +87,9 @@ export async function generateMetadata({
     },
     robots: { index: true, follow: true },
     icons: { icon: "/favicon.ico" },
+    ...(process.env.GOOGLE_SITE_VERIFICATION && {
+      verification: { google: process.env.GOOGLE_SITE_VERIFICATION },
+    }),
   };
 }
 
