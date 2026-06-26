@@ -24,10 +24,10 @@ export default async function AdminDashboardPage() {
   }));
 
   const env = [
-    { key: "DATABASE_URL", set: !!process.env.DATABASE_URL, note: "Live catalog DB" },
     { key: "ANTHROPIC_API_KEY", set: !!process.env.ANTHROPIC_API_KEY, note: "AI generator + assistant" },
-    { key: "AMAZON_AFFILIATE_TAG", set: !!process.env.AMAZON_AFFILIATE_TAG, note: "Amazon commission" },
-    { key: "NOON_AFFILIATE_QUERY", set: !!process.env.NOON_AFFILIATE_QUERY, note: "Noon commission" },
+    { key: "AMAZON_ASSOCIATE_TAG", set: !!process.env.AMAZON_ASSOCIATE_TAG, note: "Amazon commission" },
+    { key: "NOON_AFFILIATE_TAG", set: !!process.env.NOON_AFFILIATE_TAG, note: "Noon commission" },
+    { key: "DATA_DIR", set: !!process.env.DATA_DIR, note: "Persistent product store" },
   ];
 
   return (

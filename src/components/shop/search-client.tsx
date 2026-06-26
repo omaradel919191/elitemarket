@@ -5,13 +5,13 @@ import { useLocale, useTranslations } from "next-intl";
 import { Search as SearchIcon } from "lucide-react";
 import { Container } from "@/components/ui/container";
 import { ProductGrid } from "./product-grid";
-import { searchProducts } from "@/lib/catalog";
+import { filterProducts, type Product } from "@/lib/catalog-types";
 
-export function SearchClient() {
+export function SearchClient({ products }: { products: Product[] }) {
   const t = useTranslations("search");
   const locale = useLocale();
   const [q, setQ] = useState("");
-  const results = useMemo(() => searchProducts(q), [q]);
+  const results = useMemo(() => filterProducts(products, q), [products, q]);
   const trimmed = q.trim();
 
   return (

@@ -17,8 +17,11 @@ export async function GET(
   const product = getProduct(slug);
   const link = product ? getRetailerLink(product, to) : undefined;
 
-  if (!link) {
-    return NextResponse.redirect(new URL("/en/shop", req.nextUrl.origin), 302);
+  // No live affiliate link → send back to the product page (or shop), never a
+  // wrong/dead retailer link.
+  if (!link || !link.url.trim()) {
+    const fallback = product ? `/en/product/${slug}` : "/en/shop";
+    return NextResponse.redirect(new URL(fallback, req.nextUrl.origin), 302);
   }
 
   const dest = withAffiliate(link.url, to);

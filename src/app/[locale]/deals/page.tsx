@@ -5,6 +5,8 @@ import { PageHeader } from "@/components/ui/page-header";
 import { ProductGrid } from "@/components/shop/product-grid";
 import { getDeals } from "@/lib/catalog";
 
+export const dynamic = "force-dynamic";
+
 export async function generateMetadata({
   params,
 }: {

@@ -16,8 +16,12 @@ services:
       NODE_ENV: production
       PORT: "3000"
       HOSTNAME: 0.0.0.0
+      DATA_DIR: /app/content
     expose:
       - "3000"
+    volumes:
+      # Persist admin product edits across redeploys.
+      - elitemarket_content:/app/content
     healthcheck:
       test:
         - CMD
@@ -36,6 +40,9 @@ services:
       - "traefik.http.routers.elitemarket.tls=true"
       - "traefik.http.routers.elitemarket.tls.certresolver=${CERT_RESOLVER:-letsencrypt}"
       - "traefik.http.services.elitemarket.loadbalancer.server.port=3000"
+
+volumes:
+  elitemarket_content:
 
 # Join the host's existing Traefik network (created outside this stack).
 networks:

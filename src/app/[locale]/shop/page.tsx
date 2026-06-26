@@ -6,6 +6,8 @@ import { CategoryFilter } from "@/components/shop/category-filter";
 import { ProductGrid } from "@/components/shop/product-grid";
 import { getAllProducts } from "@/lib/catalog";
 
+export const dynamic = "force-dynamic";
+
 export async function generateMetadata({
   params,
 }: {

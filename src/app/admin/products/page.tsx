@@ -1,9 +1,11 @@
 import Image from "next/image";
-import { Sparkles, ExternalLink } from "lucide-react";
+import { Plus, ExternalLink, Pencil } from "lucide-react";
 import { requireAdmin } from "@/lib/admin-auth";
 import { AdminShell } from "@/components/admin/admin-shell";
 import { getAllProducts } from "@/lib/catalog";
 import { formatAED } from "@/lib/utils";
+
+export const dynamic = "force-dynamic";
 
 export default async function AdminProductsPage() {
   await requireAdmin();
@@ -17,8 +19,8 @@ export default async function AdminProductsPage() {
           href="/admin/products/new"
           className="inline-flex items-center gap-2 rounded-full bg-gradient-to-b from-gold-soft to-gold-deep px-5 py-2.5 text-sm font-medium text-ink transition-transform hover:-translate-y-0.5"
         >
-          <Sparkles className="h-4 w-4" />
-          AI Generator
+          <Plus className="h-4 w-4" />
+          Add product
         </a>
       </div>
 
@@ -75,15 +77,23 @@ export default async function AdminProductsPage() {
                     <span className="text-ash-dim">—</span>
                   )}
                 </td>
-                <td className="px-4 py-3 text-right">
-                  <a
-                    href={`/product/${p.slug}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1 text-gold hover:text-gold-soft"
-                  >
-                    View <ExternalLink className="h-3.5 w-3.5" />
-                  </a>
+                <td className="px-4 py-3">
+                  <div className="flex items-center justify-end gap-4">
+                    <a
+                      href={`/admin/products/${p.slug}/edit`}
+                      className="inline-flex items-center gap-1 text-gold hover:text-gold-soft"
+                    >
+                      <Pencil className="h-3.5 w-3.5" /> Edit
+                    </a>
+                    <a
+                      href={`/en/product/${p.slug}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1 text-ash hover:text-chrome"
+                    >
+                      View <ExternalLink className="h-3.5 w-3.5" />
+                    </a>
+                  </div>
                 </td>
               </tr>
             ))}

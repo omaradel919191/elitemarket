@@ -7,16 +7,17 @@ import { Container } from "@/components/ui/container";
 import { Button } from "@/components/ui/button";
 import { Rating } from "./rating";
 import { useWishlist } from "@/lib/use-wishlist";
-import { getProduct, localized, type Product } from "@/lib/catalog";
+import { localized, type Product } from "@/lib/catalog-types";
 import { formatAED } from "@/lib/utils";
 
-export function CompareClient() {
+export function CompareClient({ products: all }: { products: Product[] }) {
   const t = useTranslations("compare");
   const tc = useTranslations("categories");
   const locale = useLocale();
   const { slugs, ready } = useWishlist();
+  const bySlug = new Map(all.map((p) => [p.slug, p]));
   const products = slugs
-    .map(getProduct)
+    .map((s) => bySlug.get(s))
     .filter((p): p is Product => Boolean(p));
 
   if (!ready) {

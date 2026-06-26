@@ -2,6 +2,9 @@ import type { Metadata } from "next";
 import { setRequestLocale, getTranslations } from "next-intl/server";
 import { PageHeader } from "@/components/ui/page-header";
 import { CompareClient } from "@/components/shop/compare-client";
+import { getAllProducts } from "@/lib/catalog";
+
+export const dynamic = "force-dynamic";
 
 export async function generateMetadata({
   params,
@@ -30,7 +33,7 @@ export default async function ComparePage({
         subtitle={t("subtitle")}
       />
       <section className="pb-28">
-        <CompareClient />
+        <CompareClient products={getAllProducts()} />
       </section>
     </>
   );

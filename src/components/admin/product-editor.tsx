@@ -1,0 +1,332 @@
+"use client";
+
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { Sparkles, Save, Trash2 } from "lucide-react";
+import { CATEGORIES } from "@/lib/site";
+import { getRetailerLink, type Product } from "@/lib/catalog-types";
+
+const BADGES = ["", "best-pick", "luxury-deal", "editor-choice"] as const;
+
+function lines(v: string): string[] {
+  return v
+    .split("\n")
+    .map((s) => s.trim())
+    .filter(Boolean);
+}
+
+export function ProductEditor({
+  mode,
+  product,
+}: {
+  mode: "create" | "edit";
+  product?: Product;
+}) {
+  const router = useRouter();
+  const [busy, setBusy] = useState(false);
+  const [ai, setBusyAi] = useState(false);
+  const [msg, setMsg] = useState("");
+
+  const [f, setF] = useState({
+    slug: product?.slug ?? "",
+    category: product?.category ?? "perfumes",
+    brand: product?.brand ?? "ELITE",
+    name: product?.name ?? "",
+    nameAr: product?.nameAr ?? "",
+    blurb: product?.blurb ?? "",
+    blurbAr: product?.blurbAr ?? "",
+    image: product?.image ?? "/brand/products/perfume.png",
+    priceAed: product?.priceAed != null ? String(product.priceAed) : "",
+    wasAed: product?.wasAed != null ? String(product.wasAed) : "",
+    rating: product?.rating != null ? String(product.rating) : "",
+    deal: product?.deal ?? false,
+    badge: product?.badge ?? "",
+    bestFor: product?.bestFor ?? "",
+    bestForAr: product?.bestForAr ?? "",
+    pros: (product?.pros ?? []).join("\n"),
+    prosAr: (product?.prosAr ?? []).join("\n"),
+    cons: (product?.cons ?? []).join("\n"),
+    consAr: (product?.consAr ?? []).join("\n"),
+    features: (product?.features ?? []).join("\n"),
+    featuresAr: (product?.featuresAr ?? []).join("\n"),
+    amazonUrl: product ? (getRetailerLink(product, "amazon")?.url ?? "") : "",
+    noonUrl: product ? (getRetailerLink(product, "noon")?.url ?? "") : "",
+  });
+
+  function set<K extends keyof typeof f>(k: K, v: (typeof f)[K]) {
+    setF((prev) => ({ ...prev, [k]: v }));
+  }
+
+  async function aiFill() {
+    if (!f.name.trim() || ai) return;
+    setBusyAi(true);
+    setMsg("");
+    try {
+      const res = await fetch("/api/admin/generate-product", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: f.name,
+          brand: f.brand,
+          category: f.category,
+          priceAed: f.priceAed ? Number(f.priceAed) : null,
+          notes: f.blurb,
+        }),
+      });
+      const data = await res.json();
+      const d = data.draft ?? {};
+      setF((prev) => ({
+        ...prev,
+        nameAr: d.nameAr || prev.nameAr,
+        blurb: d.blurb || prev.blurb,
+        blurbAr: d.blurbAr || prev.blurbAr,
+        bestFor: d.bestFor || prev.bestFor,
+        bestForAr: d.bestForAr || prev.bestForAr,
+        pros: (d.pros ?? lines(prev.pros)).join("\n"),
+        prosAr: (d.prosAr ?? lines(prev.prosAr)).join("\n"),
+        cons: (d.cons ?? lines(prev.cons)).join("\n"),
+        consAr: (d.consAr ?? lines(prev.consAr)).join("\n"),
+        features: (d.features ?? lines(prev.features)).join("\n"),
+        featuresAr: (d.featuresAr ?? lines(prev.featuresAr)).join("\n"),
+        image: d.image || prev.image,
+      }));
+      setMsg(data.ai ? "AI filled the copy fields." : "Scaffold filled (set ANTHROPIC_API_KEY for full copy).");
+    } catch {
+      setMsg("AI fill failed.");
+    } finally {
+      setBusyAi(false);
+    }
+  }
+
+  async function save(e: React.FormEvent) {
+    e.preventDefault();
+    if (!f.name.trim() || busy) return;
+    setBusy(true);
+    setMsg("");
+    try {
+      const res = await fetch("/api/admin/save-product", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          slug: f.slug || undefined,
+          category: f.category,
+          brand: f.brand,
+          name: f.name,
+          nameAr: f.nameAr,
+          blurb: f.blurb,
+          blurbAr: f.blurbAr,
+          image: f.image,
+          priceAed: f.priceAed,
+          wasAed: f.wasAed,
+          rating: f.rating,
+          deal: f.deal,
+          badge: f.badge,
+          bestFor: f.bestFor,
+          bestForAr: f.bestForAr,
+          pros: lines(f.pros),
+          prosAr: lines(f.prosAr),
+          cons: lines(f.cons),
+          consAr: lines(f.consAr),
+          features: lines(f.features),
+          featuresAr: lines(f.featuresAr),
+          amazonUrl: f.amazonUrl,
+          noonUrl: f.noonUrl,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "save failed");
+      router.push("/admin/products");
+      router.refresh();
+    } catch (err) {
+      setMsg(err instanceof Error ? err.message : "Save failed");
+      setBusy(false);
+    }
+  }
+
+  async function remove() {
+    if (!product || !confirm(`Delete "${product.name}"?`)) return;
+    setBusy(true);
+    await fetch("/api/admin/delete-product", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ slug: product.slug }),
+    });
+    router.push("/admin/products");
+    router.refresh();
+  }
+
+  const field =
+    "h-11 w-full rounded-xl border border-line bg-night/60 px-3.5 text-sm text-chrome focus:border-gold/50 focus:outline-none";
+  const area =
+    "w-full rounded-xl border border-line bg-night/60 px-3.5 py-2.5 text-sm text-chrome focus:border-gold/50 focus:outline-none";
+  const lbl = "mb-1.5 block text-xs font-medium uppercase tracking-wide text-ash-dim";
+  const card = "rounded-2xl border border-line/70 bg-surface/40 p-6";
+
+  return (
+    <form onSubmit={save} className="space-y-6">
+      {/* Core */}
+      <div className={card}>
+        <div className="flex items-center justify-between">
+          <h2 className="font-display text-lg font-semibold text-chrome">Core</h2>
+          <button
+            type="button"
+            onClick={aiFill}
+            disabled={ai || !f.name.trim()}
+            className="inline-flex items-center gap-1.5 rounded-full border border-gold/30 px-3 py-1.5 text-xs text-gold transition-colors hover:bg-gold/[0.08] disabled:opacity-40"
+          >
+            <Sparkles className="h-3.5 w-3.5" />
+            {ai ? "Filling…" : "AI fill copy"}
+          </button>
+        </div>
+        <div className="mt-4 grid gap-4 sm:grid-cols-2">
+          <div>
+            <label className={lbl}>Name (EN)</label>
+            <input className={field} value={f.name} onChange={(e) => set("name", e.target.value)} required />
+          </div>
+          <div>
+            <label className={lbl}>Name (AR)</label>
+            <input className={field} value={f.nameAr} onChange={(e) => set("nameAr", e.target.value)} dir="rtl" />
+          </div>
+          <div>
+            <label className={lbl}>Brand</label>
+            <input className={field} value={f.brand} onChange={(e) => set("brand", e.target.value)} />
+          </div>
+          <div>
+            <label className={lbl}>Category</label>
+            <select className={field} value={f.category} onChange={(e) => set("category", e.target.value as typeof f.category)}>
+              {CATEGORIES.map((c) => (
+                <option key={c.slug} value={c.slug}>{c.slug}</option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label className={lbl}>Slug {mode === "edit" && "(fixed)"}</label>
+            <input className={field} value={f.slug} onChange={(e) => set("slug", e.target.value)} readOnly={mode === "edit"} placeholder="auto from name" />
+          </div>
+          <div>
+            <label className={lbl}>Image path</label>
+            <input className={field} value={f.image} onChange={(e) => set("image", e.target.value)} />
+          </div>
+          <div className="sm:col-span-2">
+            <label className={lbl}>Short description (EN)</label>
+            <textarea className={area} rows={2} value={f.blurb} onChange={(e) => set("blurb", e.target.value)} />
+          </div>
+          <div className="sm:col-span-2">
+            <label className={lbl}>Short description (AR)</label>
+            <textarea className={area} rows={2} value={f.blurbAr} onChange={(e) => set("blurbAr", e.target.value)} dir="rtl" />
+          </div>
+        </div>
+      </div>
+
+      {/* Pricing & badge */}
+      <div className={card}>
+        <h2 className="font-display text-lg font-semibold text-chrome">Pricing & badge</h2>
+        <div className="mt-4 grid gap-4 sm:grid-cols-4">
+          <div>
+            <label className={lbl}>Price (AED)</label>
+            <input className={field} type="number" value={f.priceAed} onChange={(e) => set("priceAed", e.target.value)} />
+          </div>
+          <div>
+            <label className={lbl}>Was (AED)</label>
+            <input className={field} type="number" value={f.wasAed} onChange={(e) => set("wasAed", e.target.value)} />
+          </div>
+          <div>
+            <label className={lbl}>Rating</label>
+            <input className={field} type="number" step="0.1" max="5" value={f.rating} onChange={(e) => set("rating", e.target.value)} />
+          </div>
+          <div>
+            <label className={lbl}>Badge</label>
+            <select className={field} value={f.badge} onChange={(e) => set("badge", e.target.value)}>
+              {BADGES.map((b) => (
+                <option key={b} value={b}>{b || "none"}</option>
+              ))}
+            </select>
+          </div>
+          <label className="flex items-center gap-2 text-sm text-ash sm:col-span-4">
+            <input type="checkbox" checked={f.deal} onChange={(e) => set("deal", e.target.checked)} className="h-4 w-4 accent-[#d4af37]" />
+            On deal
+          </label>
+        </div>
+      </div>
+
+      {/* Retailer links */}
+      <div className={card}>
+        <h2 className="font-display text-lg font-semibold text-chrome">Retailer links</h2>
+        <p className="mt-1 text-xs text-ash-dim">Leave empty to show “coming soon”. Affiliate tags are appended automatically.</p>
+        <div className="mt-4 grid gap-4 sm:grid-cols-2">
+          <div>
+            <label className={lbl}>Amazon URL</label>
+            <input className={field} value={f.amazonUrl} onChange={(e) => set("amazonUrl", e.target.value)} placeholder="https://www.amazon.ae/dp/…" />
+          </div>
+          <div>
+            <label className={lbl}>Noon URL</label>
+            <input className={field} value={f.noonUrl} onChange={(e) => set("noonUrl", e.target.value)} placeholder="https://www.noon.com/…" />
+          </div>
+        </div>
+      </div>
+
+      {/* Details */}
+      <div className={card}>
+        <h2 className="font-display text-lg font-semibold text-chrome">Details</h2>
+        <p className="mt-1 text-xs text-ash-dim">One item per line.</p>
+        <div className="mt-4 grid gap-4 sm:grid-cols-2">
+          <div>
+            <label className={lbl}>Best for (EN)</label>
+            <input className={field} value={f.bestFor} onChange={(e) => set("bestFor", e.target.value)} />
+          </div>
+          <div>
+            <label className={lbl}>Best for (AR)</label>
+            <input className={field} value={f.bestForAr} onChange={(e) => set("bestForAr", e.target.value)} dir="rtl" />
+          </div>
+          <div>
+            <label className={lbl}>Pros (EN)</label>
+            <textarea className={area} rows={3} value={f.pros} onChange={(e) => set("pros", e.target.value)} />
+          </div>
+          <div>
+            <label className={lbl}>Pros (AR)</label>
+            <textarea className={area} rows={3} value={f.prosAr} onChange={(e) => set("prosAr", e.target.value)} dir="rtl" />
+          </div>
+          <div>
+            <label className={lbl}>Cons (EN)</label>
+            <textarea className={area} rows={2} value={f.cons} onChange={(e) => set("cons", e.target.value)} />
+          </div>
+          <div>
+            <label className={lbl}>Cons (AR)</label>
+            <textarea className={area} rows={2} value={f.consAr} onChange={(e) => set("consAr", e.target.value)} dir="rtl" />
+          </div>
+          <div>
+            <label className={lbl}>Features (EN)</label>
+            <textarea className={area} rows={3} value={f.features} onChange={(e) => set("features", e.target.value)} />
+          </div>
+          <div>
+            <label className={lbl}>Features (AR)</label>
+            <textarea className={area} rows={3} value={f.featuresAr} onChange={(e) => set("featuresAr", e.target.value)} dir="rtl" />
+          </div>
+        </div>
+      </div>
+
+      <div className="flex items-center gap-3">
+        <button
+          type="submit"
+          disabled={busy || !f.name.trim()}
+          className="inline-flex h-11 items-center gap-2 rounded-full bg-gradient-to-b from-gold-soft to-gold-deep px-6 text-sm font-medium text-ink transition-transform hover:-translate-y-0.5 disabled:opacity-40"
+        >
+          <Save className="h-4 w-4" />
+          {busy ? "Saving…" : "Save product"}
+        </button>
+        {mode === "edit" && (
+          <button
+            type="button"
+            onClick={remove}
+            disabled={busy}
+            className="inline-flex h-11 items-center gap-2 rounded-full border border-danger/40 px-5 text-sm text-danger transition-colors hover:bg-danger/10"
+          >
+            <Trash2 className="h-4 w-4" />
+            Delete
+          </button>
+        )}
+        {msg && <span className="text-sm text-ash">{msg}</span>}
+      </div>
+    </form>
+  );
+}

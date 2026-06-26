@@ -28,6 +28,8 @@ RUN addgroup -g 1001 -S nodejs && adduser -S nextjs -u 1001
 COPY --from=builder /app/public ./public
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
+# Editable product store (seeded; mount a volume here to persist admin edits).
+COPY --from=builder --chown=nextjs:nodejs /app/content ./content
 
 USER nextjs
 EXPOSE 3000

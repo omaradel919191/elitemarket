@@ -10,18 +10,11 @@ import { Rating } from "@/components/shop/rating";
 import { BuyButtons } from "@/components/shop/buy-buttons";
 import { ProductGrid } from "@/components/shop/product-grid";
 import { JsonLd } from "@/components/seo/json-ld";
-import {
-  getAllProducts,
-  getProduct,
-  getRelated,
-  localized,
-} from "@/lib/catalog";
+import { getProduct, getRelated, localized } from "@/lib/catalog";
 import { SITE } from "@/lib/site";
 import { formatAED } from "@/lib/utils";
 
-export function generateStaticParams() {
-  return getAllProducts().map((p) => ({ slug: p.slug }));
-}
+export const dynamic = "force-dynamic";
 
 export async function generateMetadata({
   params,
@@ -52,9 +45,15 @@ export default async function ProductPage({
   const t = await getTranslations("product");
   const tc = await getTranslations("categories");
   const tn = await getTranslations("nav");
+  const tb = await getTranslations("badge");
   const l = localized(product, locale);
   const related = getRelated(product);
   const lp = `/${locale}`;
+  const badgeLabel = product.badge
+    ? tb(product.badge)
+    : product.deal
+      ? t("deal")
+      : null;
 
   const productLd = {
     "@context": "https://schema.org",
@@ -136,9 +135,9 @@ export default async function ProductPage({
                 sizes="(max-width: 1024px) 100vw, 50vw"
                 className="object-contain p-10"
               />
-              {product.deal && (
+              {badgeLabel && (
                 <span className="absolute top-5 rounded-full bg-gold px-3 py-1 text-xs font-semibold uppercase tracking-wide text-ink ltr:left-5 rtl:right-5">
-                  {t("deal")}
+                  {badgeLabel}
                 </span>
               )}
             </div>
@@ -186,7 +185,11 @@ export default async function ProductPage({
               </p>
               <BuyButtons
                 product={product}
-                labels={{ amazon: t("buyAmazon"), noon: t("buyNoon") }}
+                labels={{
+                  amazon: t("buyAmazon"),
+                  noon: t("buyNoon"),
+                  soon: t("comingSoon"),
+                }}
               />
               <p className="mt-3 text-xs leading-relaxed text-ash-dim">
                 {t("affiliateNote")}

@@ -3,23 +3,26 @@ import { ArrowUpRight } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import { Rating } from "./rating";
 import { WishlistButton } from "./wishlist-button";
-import { localized, type Product } from "@/lib/catalog";
+import { localized, type Product } from "@/lib/catalog-types";
 import { formatAED } from "@/lib/utils";
 
 export function ProductCard({
   product,
   locale,
   dealLabel,
+  badgeLabel,
   categoryName,
   wishlistLabels,
 }: {
   product: Product;
   locale: string;
   dealLabel: string;
+  badgeLabel?: string;
   categoryName: string;
   wishlistLabels: { add: string; remove: string };
 }) {
   const l = localized(product, locale);
+  const tag = badgeLabel ?? (product.deal ? dealLabel : null);
 
   return (
     <Link
@@ -34,9 +37,9 @@ export function ProductCard({
           sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 320px"
           className="object-contain p-6 transition-transform duration-700 ease-luxe group-hover:scale-105"
         />
-        {product.deal && (
+        {tag && (
           <span className="absolute top-3 rounded-full bg-gold px-2.5 py-1 text-[0.65rem] font-semibold uppercase tracking-wide text-ink ltr:left-3 rtl:right-3">
-            {dealLabel}
+            {tag}
           </span>
         )}
         <WishlistButton

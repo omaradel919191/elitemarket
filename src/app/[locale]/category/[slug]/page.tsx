@@ -10,9 +10,7 @@ import { getProductsByCategory } from "@/lib/catalog";
 
 const SLUGS = CATEGORIES.map((c) => c.slug);
 
-export function generateStaticParams() {
-  return SLUGS.map((slug) => ({ slug }));
-}
+export const dynamic = "force-dynamic";
 
 function isValid(slug: string): slug is CategorySlug {
   return (SLUGS as string[]).includes(slug);

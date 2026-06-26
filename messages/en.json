@@ -55,6 +55,11 @@
     "subtitle": "Our curators' current picks at their best available prices.",
     "empty": "No active deals right now — check back soon."
   },
+  "badge": {
+    "best-pick": "Best Pick",
+    "luxury-deal": "Luxury Deal",
+    "editor-choice": "Editor's Choice"
+  },
   "search": {
     "eyebrow": "Find Your Piece",
     "title": "Search",
@@ -211,7 +216,8 @@
     "whereToBuy": "Where to Buy",
     "priceNote": "Indicative price — confirm the live price on the retailer's site.",
     "disclosureShort": "Affiliate link — we may earn a commission.",
-    "affiliateNote": "We may earn a commission when you buy through these links, at no extra cost to you. We never process your payment — you check out securely on Amazon or Noon."
+    "affiliateNote": "We may earn a commission when you buy through these links, at no extra cost to you. We never process your payment — you check out securely on Amazon or Noon.",
+    "comingSoon": "Buy links coming soon"
   },
   "newsletter": {
     "title": "Join the Elite list",

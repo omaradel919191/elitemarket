@@ -1,7 +1,7 @@
 import { useTranslations } from "next-intl";
 import { Reveal } from "@/components/ui/reveal";
 import { ProductCard } from "./product-card";
-import type { Product } from "@/lib/catalog";
+import type { Product } from "@/lib/catalog-types";
 
 export function ProductGrid({
   products,
@@ -28,6 +28,7 @@ export function ProductGrid({
             product={p}
             locale={locale}
             dealLabel={t("shop.deal")}
+            badgeLabel={p.badge ? t(`badge.${p.badge}`) : undefined}
             categoryName={t(`categories.${p.category}.name`)}
             wishlistLabels={{ add: t("wishlist.add"), remove: t("wishlist.remove") }}
           />
