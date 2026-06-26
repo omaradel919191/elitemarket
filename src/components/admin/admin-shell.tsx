@@ -4,6 +4,7 @@ import {
   Package,
   Plus,
   ShoppingBag,
+  Tag,
   ExternalLink,
   LogOut,
 } from "lucide-react";
@@ -15,6 +16,7 @@ const NAV = [
   { href: "/admin/products", label: "Products", Icon: Package },
   { href: "/admin/products/new", label: "Add Product", Icon: Plus },
   { href: "/admin/orders", label: "Orders", Icon: ShoppingBag },
+  { href: "/admin/coupons", label: "Discount codes", Icon: Tag },
 ];
 
 export function AdminShell({

@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { getProduct, isBuyable, localized } from "@/lib/catalog";
 import { getStripe, CHECKOUT_CURRENCY } from "@/lib/payments/stripe";
+import { validateCoupon } from "@/lib/coupons";
 
 /**
  * Create a Stripe Checkout Session for OUR OWN products. The client sends only
@@ -21,7 +22,11 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "not_configured" }, { status: 503 });
   }
 
-  let body: { lines?: { slug: string; qty: number }[]; locale?: string };
+  let body: {
+    lines?: { slug: string; qty: number }[];
+    locale?: string;
+    code?: string;
+  };
   try {
     body = await req.json();
   } catch {
@@ -40,12 +45,14 @@ export async function POST(req: NextRequest) {
   const lineItems: import("stripe").Stripe.Checkout.SessionCreateParams.LineItem[] =
     [];
   const meta: { slug: string; qty: number }[] = [];
+  let subtotalAed = 0;
 
   for (const line of lines) {
     const qty = Math.min(99, Math.max(1, Math.floor(Number(line?.qty) || 0)));
     const product = getProduct(String(line?.slug ?? ""));
     if (!product || !isBuyable(product) || qty < 1) continue;
     const name = localized(product, locale).name;
+    subtotalAed += (product.priceAed as number) * qty;
     lineItems.push({
       quantity: qty,
       price_data: {
@@ -87,6 +94,30 @@ export async function POST(req: NextRequest) {
         ]
       : undefined;
 
+  // Re-validate any discount code server-side against the real subtotal, then
+  // apply it as a one-off Stripe coupon (amount_off).
+  let discounts:
+    | import("stripe").Stripe.Checkout.SessionCreateParams.Discount[]
+    | undefined;
+  let appliedCode = "";
+  if (body.code) {
+    const v = validateCoupon(String(body.code), subtotalAed);
+    if (v.ok && v.discountAed > 0) {
+      try {
+        const coupon = await stripe.coupons.create({
+          amount_off: Math.round(v.discountAed * 100),
+          currency: CHECKOUT_CURRENCY,
+          duration: "once",
+          name: v.code,
+        });
+        discounts = [{ coupon: coupon.id }];
+        appliedCode = v.code;
+      } catch {
+        /* discount failed to attach — proceed without it */
+      }
+    }
+  }
+
   try {
     const session = await stripe.checkout.sessions.create({
       mode: "payment",
@@ -95,9 +126,14 @@ export async function POST(req: NextRequest) {
       phone_number_collection: { enabled: true },
       billing_address_collection: "auto",
       ...(shippingOptions && { shipping_options: shippingOptions }),
+      ...(discounts && { discounts }),
       success_url: `${origin}/${locale}/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${origin}/${locale}/cart`,
-      metadata: { cart: JSON.stringify(meta).slice(0, 480), locale },
+      metadata: {
+        cart: JSON.stringify(meta).slice(0, 480),
+        locale,
+        ...(appliedCode && { code: appliedCode }),
+      },
     });
     return NextResponse.json({ url: session.url });
   } catch (e) {

@@ -5,11 +5,13 @@ import { getProduct, localized, decrementStock } from "@/lib/catalog";
 import {
   upsertOrder,
   updateOrder,
+  getOrder,
   type Order,
   type OrderItem,
   type ShippingAddress,
 } from "@/lib/orders";
 import { createShipment, isOtoConfigured } from "@/lib/shipping/oto";
+import { sendOrderEmails } from "@/lib/email";
 
 /**
  * Stripe webhook. On a successful checkout it records the order (re-pricing
@@ -166,6 +168,9 @@ export async function POST(req: NextRequest) {
       });
     }
   }
+
+  // Order confirmation + owner notification (best-effort; never blocks).
+  await sendOrderEmails(getOrder(order.id) ?? order);
 
   return NextResponse.json({ received: true });
 }

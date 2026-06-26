@@ -46,6 +46,10 @@ export default async function CartPage({
               redirecting: t("redirecting"),
               setup: t("setup"),
               error: t("error"),
+              promo: t("promo"),
+              apply: t("apply"),
+              discount: t("discount"),
+              total: t("total"),
             }}
           />
         </Container>

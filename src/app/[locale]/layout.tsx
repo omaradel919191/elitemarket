@@ -14,6 +14,7 @@ import { SiteFooter } from "@/components/layout/site-footer";
 import { SmoothScroll } from "@/components/providers/smooth-scroll";
 import { AmbientGold } from "@/components/brand/ambient-gold";
 import { AssistantWidget } from "@/components/assistant/assistant-widget";
+import { WhatsAppButton } from "@/components/layout/whatsapp-button";
 import { JsonLd } from "@/components/seo/json-ld";
 import { SITE } from "@/lib/site";
 import { getActiveCategorySlugs } from "@/lib/catalog";
@@ -98,6 +99,7 @@ export default async function LocaleLayout({
   setRequestLocale(locale);
   const dir = locale === "ar" ? "rtl" : "ltr";
   const categories = getActiveCategorySlugs();
+  const whatsapp = process.env.WHATSAPP_NUMBER?.trim();
 
   return (
     <html
@@ -146,6 +148,17 @@ export default async function LocaleLayout({
           <main className="relative z-10 flex-1">{children}</main>
           <SiteFooter />
           <AssistantWidget />
+          {whatsapp && (
+            <WhatsAppButton
+              number={whatsapp}
+              label="WhatsApp"
+              message={
+                locale === "ar"
+                  ? "مرحبا، عندي سؤال عن منتجاتكم"
+                  : "Hi, I have a question about your products"
+              }
+            />
+          )}
         </NextIntlClientProvider>
       </body>
     </html>

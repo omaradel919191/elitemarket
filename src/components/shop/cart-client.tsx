@@ -26,11 +26,19 @@ export function CartClient({
     redirecting: string;
     setup: string;
     error: string;
+    promo: string;
+    apply: string;
+    discount: string;
+    total: string;
   };
 }) {
   const { lines, setQty, remove, ready } = useCart();
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState("");
+  const [code, setCode] = useState("");
+  const [applied, setApplied] = useState<{ code: string; discountAed: number; label: string } | null>(null);
+  const [codeMsg, setCodeMsg] = useState("");
+  const [codeBusy, setCodeBusy] = useState(false);
 
   const bySlug = new Map(products.map((p) => [p.slug, p]));
   const items = lines
@@ -41,6 +49,36 @@ export function CartClient({
     (s, x) => s + (x.product.priceAed ?? 0) * x.qty,
     0,
   );
+  const discount = applied ? Math.min(applied.discountAed, subtotal) : 0;
+  const total = Math.max(0, subtotal - discount);
+
+  async function applyCode() {
+    if (codeBusy || !code.trim()) return;
+    setCodeBusy(true);
+    setCodeMsg("");
+    try {
+      const res = await fetch("/api/coupon/validate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          code,
+          lines: items.map((x) => ({ slug: x.product.slug, qty: x.qty })),
+        }),
+      });
+      const data = await res.json();
+      if (data.ok) {
+        setApplied({ code: data.code, discountAed: data.discountAed, label: data.label });
+        setCodeMsg("");
+      } else {
+        setApplied(null);
+        setCodeMsg(data.error || "Invalid code");
+      }
+    } catch {
+      setCodeMsg("Could not check the code");
+    } finally {
+      setCodeBusy(false);
+    }
+  }
 
   async function checkout() {
     if (busy || items.length === 0) return;
@@ -53,6 +91,7 @@ export function CartClient({
         body: JSON.stringify({
           lines: items.map((x) => ({ slug: x.product.slug, qty: x.qty })),
           locale,
+          code: applied?.code,
         }),
       });
       if (res.status === 503) {
@@ -169,10 +208,48 @@ export function CartClient({
         <div className="rounded-2xl border border-line/70 bg-surface/40 p-6">
           <div className="flex items-center justify-between">
             <span className="text-sm text-ash">{labels.subtotal}</span>
-            <span className="font-display text-xl font-semibold text-chrome">
+            <span className="font-display text-lg font-semibold text-chrome">
               {formatAED(subtotal, locale)}
             </span>
           </div>
+
+          {/* Promo code */}
+          <div className="mt-4">
+            <div className="flex gap-2">
+              <input
+                value={code}
+                onChange={(e) => setCode(e.target.value.toUpperCase())}
+                placeholder={labels.promo}
+                className="h-10 flex-1 rounded-xl border border-line bg-night/60 px-3 text-sm text-chrome focus:border-gold/50 focus:outline-none"
+              />
+              <button
+                type="button"
+                onClick={applyCode}
+                disabled={codeBusy || !code.trim()}
+                className="h-10 shrink-0 rounded-xl border border-gold/35 px-4 text-sm text-gold transition-colors hover:bg-gold/[0.06] disabled:opacity-40"
+              >
+                {labels.apply}
+              </button>
+            </div>
+            {codeMsg && <p className="mt-1.5 text-xs text-danger">{codeMsg}</p>}
+          </div>
+
+          {applied && discount > 0 && (
+            <div className="mt-4 flex items-center justify-between text-sm">
+              <span className="text-success">
+                {labels.discount} ({applied.code})
+              </span>
+              <span className="text-success">−{formatAED(discount, locale)}</span>
+            </div>
+          )}
+
+          <div className="mt-4 flex items-center justify-between border-t border-line/60 pt-4">
+            <span className="text-sm font-medium text-chrome">{labels.total}</span>
+            <span className="font-display text-xl font-semibold text-gold">
+              {formatAED(total, locale)}
+            </span>
+          </div>
+
           <p className="mt-2 text-xs text-ash-dim">{labels.shippingNote}</p>
           <button
             type="button"

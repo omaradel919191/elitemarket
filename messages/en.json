@@ -63,7 +63,11 @@
     "checkout": "Secure checkout",
     "redirecting": "Redirecting…",
     "setup": "Online payment is being set up — your items are saved here. Please check back soon.",
-    "error": "Could not start checkout. Please try again."
+    "error": "Could not start checkout. Please try again.",
+    "promo": "Discount code",
+    "apply": "Apply",
+    "discount": "Discount",
+    "total": "Total"
   },
   "success": {
     "title": "Thank you!",
