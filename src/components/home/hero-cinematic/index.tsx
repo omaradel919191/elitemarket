@@ -2,9 +2,8 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
-import { ArrowRight, ChevronDown } from "lucide-react";
+import { ArrowRight, ChevronDown, Volume2, VolumeX } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Monogram } from "@/components/brand/logo";
 import { CLIPS, HERO_VH, heroProgress, band, smoothstep } from "./progress";
 import { HeroPoster } from "./fallback";
 
@@ -20,6 +19,22 @@ export function HeroCinematic() {
   const introRef = useRef<HTMLDivElement>(null);
   const cueRef = useRef<HTMLDivElement>(null);
   const finaleRef = useRef<HTMLDivElement>(null);
+  const audioRef = useRef<HTMLAudioElement>(null);
+  const [soundOn, setSoundOn] = useState(false);
+
+  function toggleSound() {
+    const a = audioRef.current;
+    if (!a) return;
+    if (soundOn) {
+      a.pause();
+      setSoundOn(false);
+    } else {
+      a.muted = false;
+      a.volume = 0.45;
+      void a.play().catch(() => {});
+      setSoundOn(true);
+    }
+  }
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -143,7 +158,7 @@ export function HeroCinematic() {
             ref={(el) => {
               videoRefs.current[i] = el;
             }}
-            className="absolute inset-0 h-full w-full object-contain opacity-0 will-change-[opacity]"
+            className="absolute inset-0 h-full w-full object-cover opacity-0 will-change-[opacity]"
             src={c.video}
             poster={c.poster}
             muted
@@ -203,20 +218,19 @@ export function HeroCinematic() {
           <ChevronDown className="h-4 w-4 animate-bounce text-gold" />
         </div>
 
-        {/* Finale — EM logo + CTA */}
+        {/* Finale — the video resolves into the EM emblem; overlay adds the CTA */}
         <div
           ref={finaleRef}
-          className="absolute inset-0 z-30 flex flex-col items-center justify-center px-6 opacity-0"
+          className="absolute inset-0 z-30 flex flex-col items-center justify-end px-6 pb-[7%] opacity-0"
         >
-          <div className="glass glow-gold relative mb-8 flex h-28 w-28 items-center justify-center rounded-3xl">
-            <div className="sheen absolute inset-0 rounded-3xl" />
-            <Monogram className="h-16 w-16" />
-          </div>
-          <h2 className="max-w-2xl text-center font-display text-3xl font-semibold text-chrome sm:text-5xl">
+          <div className="pointer-events-none absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black via-black/70 to-transparent" />
+          <h2 className="relative max-w-2xl text-center font-display text-3xl font-semibold text-chrome sm:text-5xl">
             {tm("ctaTitle")}
           </h2>
-          <p className="mt-4 max-w-md text-center text-ash">{tm("ctaBody")}</p>
-          <div className="mt-9 flex flex-wrap items-center justify-center gap-3">
+          <p className="relative mt-4 max-w-md text-center text-ash">
+            {tm("ctaBody")}
+          </p>
+          <div className="relative mt-9 flex flex-wrap items-center justify-center gap-3">
             <Button href="/shop" size="lg">
               {t("ctaPrimary")}
               <ArrowRight className="h-4 w-4 rtl:rotate-180" />
@@ -226,6 +240,21 @@ export function HeroCinematic() {
             </Button>
           </div>
         </div>
+
+        {/* Ambient audio + sound toggle (sound-ready: drop a track at the src) */}
+        <audio ref={audioRef} src="/brand/audio/ambient.mp3" loop preload="none" />
+        <button
+          type="button"
+          onClick={toggleSound}
+          aria-label={soundOn ? "Mute sound" : "Enable sound"}
+          className="absolute bottom-7 z-40 flex h-10 w-10 items-center justify-center rounded-full border border-gold/30 bg-black/40 text-gold backdrop-blur-sm transition-colors hover:border-gold/60 ltr:right-6 rtl:left-6"
+        >
+          {soundOn ? (
+            <Volume2 className="h-4 w-4" />
+          ) : (
+            <VolumeX className="h-4 w-4" />
+          )}
+        </button>
       </div>
     </section>
   );
