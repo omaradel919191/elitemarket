@@ -10,6 +10,20 @@ export type Retailer = "amazon" | "noon";
 
 export type Badge = "best-pick" | "luxury-deal" | "editor-choice";
 
+/**
+ * How a product is sold:
+ *  - "own"       → our own product. Bought on-site (cart + Stripe checkout,
+ *                  shipped via our courier). Uses priceAed + stock.
+ *  - "affiliate" → we link out to Amazon/Noon. Uses links[]. No cart/payment.
+ * The roadmap is own-first; affiliate stays optional and can be removed later.
+ */
+export type ProductSource = "own" | "affiliate";
+
+/** Who a product is for. Drives the men/women/unisex filter under a category. */
+export type Audience = "men" | "women" | "unisex";
+
+export const AUDIENCES: Audience[] = ["men", "women", "unisex"];
+
 export type RetailerLink = {
   retailer: Retailer;
   /** Affiliate/product URL. Empty until the owner adds it. */
@@ -20,6 +34,10 @@ export type RetailerLink = {
 export type Product = {
   slug: string;
   category: CategorySlug;
+  /** "own" (sold here) or "affiliate" (link out). Defaults to affiliate. */
+  source: ProductSource;
+  /** men | women | unisex. Defaults to unisex. */
+  audience: Audience;
   brand: string;
   name: string;
   nameAr: string;
@@ -28,6 +46,8 @@ export type Product = {
   image: string;
   rating?: number | null;
   priceAed?: number | null;
+  /** Own products: units in stock. null/undefined = not tracked (always in stock). */
+  stock?: number | null;
   deal?: boolean;
   wasAed?: number | null;
   badge?: Badge | null;
@@ -39,8 +59,57 @@ export type Product = {
   consAr?: string[];
   features?: string[];
   featuresAr?: string[];
+  /** Affiliate retailer links (only meaningful when source === "affiliate"). */
   links: RetailerLink[];
 };
+
+/**
+ * Fill in defaults for older/partial records so the rest of the app can rely on
+ * source/audience/links always being present. Pure — safe on client and server.
+ */
+export function normalizeProduct(p: Partial<Product> & { slug: string }): Product {
+  return {
+    rating: null,
+    priceAed: null,
+    stock: null,
+    deal: false,
+    wasAed: null,
+    badge: null,
+    bestFor: "",
+    bestForAr: "",
+    pros: [],
+    prosAr: [],
+    cons: [],
+    consAr: [],
+    features: [],
+    featuresAr: [],
+    ...p,
+    source: p.source === "own" ? "own" : "affiliate",
+    audience:
+      p.audience === "men" || p.audience === "women" ? p.audience : "unisex",
+    links: Array.isArray(p.links) ? p.links : [],
+  } as Product;
+}
+
+/** Own product (sold on-site). */
+export function isOwn(p: Product): boolean {
+  return p.source === "own";
+}
+
+/** Own product that can actually be added to cart right now. */
+export function isBuyable(p: Product): boolean {
+  return (
+    p.source === "own" &&
+    p.priceAed != null &&
+    p.priceAed > 0 &&
+    (p.stock == null || p.stock > 0)
+  );
+}
+
+/** Own product that is configured but out of stock. */
+export function isSoldOut(p: Product): boolean {
+  return p.source === "own" && typeof p.stock === "number" && p.stock <= 0;
+}
 
 /** Pick the right-language fields for a product given the active locale. */
 export function localized(p: Product, locale: string) {

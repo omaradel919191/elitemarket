@@ -1,7 +1,13 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { isAdmin } from "@/lib/admin-auth";
 import { saveProduct } from "@/lib/catalog";
-import type { Badge, Product } from "@/lib/catalog-types";
+import {
+  AUDIENCES,
+  type Audience,
+  type Badge,
+  type Product,
+  type ProductSource,
+} from "@/lib/catalog-types";
 import { CATEGORIES, type CategorySlug } from "@/lib/site";
 
 const CATS = CATEGORIES.map((c) => c.slug) as string[];
@@ -52,10 +58,25 @@ export async function POST(req: NextRequest) {
     ? slugify(String(b.slug))
     : slugify(`${brand}-${name}`);
   const badge = BADGES.includes(b.badge as Badge) ? (b.badge as Badge) : null;
+  const source: ProductSource = b.source === "own" ? "own" : "affiliate";
+  const audience: Audience = AUDIENCES.includes(b.audience as Audience)
+    ? (b.audience as Audience)
+    : "unisex";
+
+  // Own products must have a price to be buyable.
+  if (source === "own" && num(b.priceAed) == null) {
+    return NextResponse.json(
+      { error: "own products need a price" },
+      { status: 400 },
+    );
+  }
 
   const product: Product = {
     slug,
+    source,
+    audience,
     category: category as CategorySlug,
+    stock: source === "own" ? num(b.stock) : null,
     brand,
     name,
     nameAr: String(b.nameAr ?? "").trim(),
@@ -75,10 +96,13 @@ export async function POST(req: NextRequest) {
     consAr: arr(b.consAr),
     features: arr(b.features),
     featuresAr: arr(b.featuresAr),
-    links: [
-      { retailer: "amazon", url: String(b.amazonUrl ?? "").trim(), priceAed: null },
-      { retailer: "noon", url: String(b.noonUrl ?? "").trim(), priceAed: null },
-    ],
+    links:
+      source === "affiliate"
+        ? [
+            { retailer: "amazon", url: String(b.amazonUrl ?? "").trim(), priceAed: null },
+            { retailer: "noon", url: String(b.noonUrl ?? "").trim(), priceAed: null },
+          ]
+        : [],
   };
 
   saveProduct(product);

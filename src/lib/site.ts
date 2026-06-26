@@ -1,10 +1,4 @@
-import {
-  SprayCan,
-  Watch,
-  Glasses,
-  Sparkles,
-  type LucideIcon,
-} from "lucide-react";
+import { SprayCan, Watch, Glasses, type LucideIcon } from "lucide-react";
 
 export const SITE = {
   name: "Elite Market",
@@ -20,7 +14,7 @@ export const SITE = {
   },
 } as const;
 
-export type CategorySlug = "perfumes" | "watches" | "sunglasses" | "beauty";
+export type CategorySlug = "perfumes" | "watches" | "sunglasses";
 
 export type CategoryDef = {
   slug: CategorySlug;
@@ -35,15 +29,10 @@ export const CATEGORIES: CategoryDef[] = [
   { slug: "perfumes", icon: SprayCan, accent: "#D4AF37", mood: "golden-light" },
   { slug: "watches", icon: Watch, accent: "#CBD2DA", mood: "mechanical" },
   { slug: "sunglasses", icon: Glasses, accent: "#C9A227", mood: "reflection" },
-  { slug: "beauty", icon: Sparkles, accent: "#E7C766", mood: "glow" },
 ];
 
-export const PRIMARY_NAV = [
-  { href: "/shop", key: "shop" },
-  { href: "/category/perfumes", key: "perfumes" },
-  { href: "/category/watches", key: "watches" },
-  { href: "/category/sunglasses", key: "sunglasses" },
-  { href: "/category/beauty", key: "beauty" },
-  { href: "/deals", key: "deals" },
-  { href: "/blog", key: "blog" },
-] as const;
+export const CATEGORY_SLUGS = CATEGORIES.map((c) => c.slug);
+
+export function isCategorySlug(s: string): s is CategorySlug {
+  return (CATEGORY_SLUGS as string[]).includes(s);
+}

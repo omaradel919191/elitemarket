@@ -4,11 +4,14 @@ import { Link } from "@/i18n/navigation";
 import { Container } from "@/components/ui/container";
 import { Reveal } from "@/components/ui/reveal";
 import { SectionHeading } from "@/components/ui/section-heading";
-import { CATEGORIES } from "@/lib/site";
+import { getActiveCategories } from "@/lib/catalog";
 
 export function CategoryShowcase() {
   const t = useTranslations("home");
   const tc = useTranslations("categories");
+  const categories = getActiveCategories();
+
+  if (categories.length === 0) return null;
 
   return (
     <section className="relative py-24 sm:py-32">
@@ -19,7 +22,7 @@ export function CategoryShowcase() {
         />
 
         <div className="mt-16 space-y-5">
-          {CATEGORIES.map((c, i) => {
+          {categories.map((c, i) => {
             const Icon = c.icon;
             return (
               <Reveal key={c.slug} delay={i * 0.05}>

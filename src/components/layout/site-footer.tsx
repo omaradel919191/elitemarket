@@ -5,21 +5,23 @@ import { Logo } from "@/components/brand/logo";
 import { InstagramIcon, YoutubeIcon, TiktokIcon } from "@/components/brand/social-icons";
 import { NewsletterForm } from "./newsletter-form";
 import { SITE } from "@/lib/site";
+import { getActiveCategorySlugs } from "@/lib/catalog";
 
 export function SiteFooter() {
   const t = useTranslations("footer");
   const tn = useTranslations("nav");
   const tnews = useTranslations("newsletter");
   const year = new Date().getFullYear();
+  const categories = getActiveCategorySlugs();
 
   const columns = [
     {
       title: t("explore"),
       links: [
-        { href: "/category/perfumes", label: tn("perfumes") },
-        { href: "/category/watches", label: tn("watches") },
-        { href: "/category/sunglasses", label: tn("sunglasses") },
-        { href: "/category/beauty", label: tn("beauty") },
+        ...categories.map((slug) => ({
+          href: `/category/${slug}`,
+          label: tn(slug),
+        })),
         { href: "/deals", label: tn("deals") },
       ],
     },

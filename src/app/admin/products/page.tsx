@@ -30,8 +30,10 @@ export default async function AdminProductsPage() {
             <tr className="border-b border-line/70 text-left text-xs uppercase tracking-wide text-ash-dim">
               <th className="px-4 py-3 font-medium">Product</th>
               <th className="px-4 py-3 font-medium">Category</th>
+              <th className="px-4 py-3 font-medium">Type</th>
+              <th className="px-4 py-3 font-medium">Audience</th>
               <th className="px-4 py-3 font-medium">Price</th>
-              <th className="px-4 py-3 font-medium">Rating</th>
+              <th className="px-4 py-3 font-medium">Stock</th>
               <th className="px-4 py-3 font-medium">Deal</th>
               <th className="px-4 py-3 font-medium" />
             </tr>
@@ -64,10 +66,28 @@ export default async function AdminProductsPage() {
                   </div>
                 </td>
                 <td className="px-4 py-3 capitalize text-ash">{p.category}</td>
+                <td className="px-4 py-3">
+                  {p.source === "own" ? (
+                    <span className="rounded-full bg-gold/15 px-2 py-0.5 text-xs text-gold">
+                      Own
+                    </span>
+                  ) : (
+                    <span className="rounded-full bg-line/60 px-2 py-0.5 text-xs text-ash-dim">
+                      Affiliate
+                    </span>
+                  )}
+                </td>
+                <td className="px-4 py-3 capitalize text-ash">{p.audience}</td>
                 <td className="px-4 py-3 text-ash">
                   {p.priceAed != null ? formatAED(p.priceAed) : "—"}
                 </td>
-                <td className="px-4 py-3 text-ash">{p.rating ?? "—"}</td>
+                <td className="px-4 py-3 text-ash">
+                  {p.source === "own"
+                    ? typeof p.stock === "number"
+                      ? p.stock
+                      : "∞"
+                    : "—"}
+                </td>
                 <td className="px-4 py-3">
                   {p.deal ? (
                     <span className="rounded-full bg-gold/15 px-2 py-0.5 text-xs text-gold">

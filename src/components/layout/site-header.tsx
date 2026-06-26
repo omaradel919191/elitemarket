@@ -1,20 +1,32 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
 import { Menu, X, Search, Heart } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Link } from "@/i18n/navigation";
 import { Container } from "@/components/ui/container";
 import { Logo } from "@/components/brand/logo";
+import { CartButton } from "@/components/shop/cart-button";
 import { LanguageSwitcher } from "./language-switcher";
-import { PRIMARY_NAV } from "@/lib/site";
+import type { CategorySlug } from "@/lib/site";
 import { cn } from "@/lib/utils";
 
-export function SiteHeader() {
+export function SiteHeader({ categories }: { categories: CategorySlug[] }) {
   const t = useTranslations("nav");
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
+
+  // Nav: Shop · <active categories> · Deals · Journal.
+  const nav = useMemo(
+    () => [
+      { href: "/shop", key: "shop" },
+      ...categories.map((slug) => ({ href: `/category/${slug}`, key: slug })),
+      { href: "/deals", key: "deals" },
+      { href: "/blog", key: "blog" },
+    ],
+    [categories],
+  );
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 24);
@@ -43,7 +55,7 @@ export function SiteHeader() {
         <Logo />
 
         <nav className="hidden items-center gap-7 lg:flex">
-          {PRIMARY_NAV.map((link) => (
+          {nav.map((link) => (
             <Link
               key={link.href}
               href={link.href}
@@ -70,6 +82,7 @@ export function SiteHeader() {
           >
             <Heart className="h-[1.15rem] w-[1.15rem]" />
           </Link>
+          <CartButton label={t("cart")} />
           <LanguageSwitcher className="ms-1" />
           <button
             type="button"
@@ -103,7 +116,7 @@ export function SiteHeader() {
               </button>
             </Container>
             <nav className="mt-6 flex flex-col gap-1 px-6">
-              {PRIMARY_NAV.map((link, i) => (
+              {nav.map((link, i) => (
                 <motion.div
                   key={link.href}
                   initial={{ opacity: 0, y: 18 }}

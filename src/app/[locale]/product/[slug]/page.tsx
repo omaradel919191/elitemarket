@@ -8,9 +8,10 @@ import { Container } from "@/components/ui/container";
 import { Reveal } from "@/components/ui/reveal";
 import { Rating } from "@/components/shop/rating";
 import { BuyButtons } from "@/components/shop/buy-buttons";
+import { AddToCart } from "@/components/shop/add-to-cart";
 import { ProductGrid } from "@/components/shop/product-grid";
 import { JsonLd } from "@/components/seo/json-ld";
-import { getProduct, getRelated, localized } from "@/lib/catalog";
+import { getProduct, getRelated, localized, isOwn } from "@/lib/catalog";
 import { SITE } from "@/lib/site";
 import { formatAED } from "@/lib/utils";
 
@@ -47,6 +48,7 @@ export default async function ProductPage({
   const tn = await getTranslations("nav");
   const tb = await getTranslations("badge");
   const l = localized(product, locale);
+  const own = isOwn(product);
   const related = getRelated(product);
   const lp = `/${locale}`;
   const badgeLabel = product.badge
@@ -168,7 +170,9 @@ export default async function ProductPage({
                 )}
               </div>
             )}
-            <p className="mt-1.5 text-xs text-ash-dim">{t("priceNote")}</p>
+            <p className="mt-1.5 text-xs text-ash-dim">
+              {own ? t("ownPriceNote") : t("priceNote")}
+            </p>
 
             {l.bestFor && (
               <div className="mt-6 rounded-2xl border border-line/70 bg-surface/40 p-4">
@@ -181,19 +185,40 @@ export default async function ProductPage({
 
             <div className="mt-8">
               <p className="mb-3 text-xs font-semibold uppercase tracking-[0.2em] text-ash-dim">
-                {t("whereToBuy")}
+                {own ? t("buyTitle") : t("whereToBuy")}
               </p>
-              <BuyButtons
-                product={product}
-                labels={{
-                  amazon: t("buyAmazon"),
-                  noon: t("buyNoon"),
-                  soon: t("comingSoon"),
-                }}
-              />
-              <p className="mt-3 text-xs leading-relaxed text-ash-dim">
-                {t("affiliateNote")}
-              </p>
+              {own ? (
+                <>
+                  <AddToCart
+                    product={product}
+                    locale={locale}
+                    labels={{
+                      add: t("addToCart"),
+                      added: t("added"),
+                      buyNow: t("buyNow"),
+                      soldOut: t("soldOut"),
+                      setup: t("checkoutSetup"),
+                    }}
+                  />
+                  <p className="mt-3 text-xs leading-relaxed text-ash-dim">
+                    {t("shipsNote")}
+                  </p>
+                </>
+              ) : (
+                <>
+                  <BuyButtons
+                    product={product}
+                    labels={{
+                      amazon: t("buyAmazon"),
+                      noon: t("buyNoon"),
+                      soon: t("comingSoon"),
+                    }}
+                  />
+                  <p className="mt-3 text-xs leading-relaxed text-ash-dim">
+                    {t("affiliateNote")}
+                  </p>
+                </>
+              )}
             </div>
           </Reveal>
         </div>

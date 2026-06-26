@@ -12,7 +12,6 @@ const CAT_KEYWORDS: Record<CategorySlug, string[]> = {
   perfumes: ["perfume", "fragrance", "scent", "cologne", "parfum", "عطر", "عطور", "برفان", "ريحة"],
   watches: ["watch", "watches", "timepiece", "wrist", "ساعة", "ساعات"],
   sunglasses: ["sunglass", "sunglasses", "eyewear", "shades", "glasses", "نظارة", "نظارات", "شمسية"],
-  beauty: ["beauty", "skincare", "skin", "cream", "serum", "care", "عناية", "كريم", "سيروم", "بشرة", "تجميل"],
 };
 
 function parseMaxPrice(q: string): number | null {

@@ -1,8 +1,17 @@
 import fs from "node:fs";
 import path from "node:path";
 import { LAUNCH_PRODUCTS } from "@/data/launch-products";
-import type { CategorySlug } from "./site";
-import type { Product } from "./catalog-types";
+import {
+  CATEGORIES,
+  isCategorySlug,
+  type CategoryDef,
+  type CategorySlug,
+} from "./site";
+import {
+  normalizeProduct,
+  type Audience,
+  type Product,
+} from "./catalog-types";
 
 /**
  * Server-only catalog data access, backed by a JSON file so the admin can edit
@@ -31,11 +40,17 @@ function ensureFile(): void {
 
 function readAll(): Product[] {
   ensureFile();
+  let raw: Product[];
   try {
-    return JSON.parse(fs.readFileSync(FILE, "utf8")) as Product[];
+    raw = JSON.parse(fs.readFileSync(FILE, "utf8")) as Product[];
   } catch {
-    return LAUNCH_PRODUCTS;
+    raw = LAUNCH_PRODUCTS;
   }
+  // Normalize defaults and drop any product in a retired category (e.g. the old
+  // "beauty" world) so it never surfaces in nav, shop or search.
+  return raw
+    .map((p) => normalizeProduct(p))
+    .filter((p) => isCategorySlug(p.category));
 }
 
 function writeAll(products: Product[]): void {
@@ -51,8 +66,13 @@ export function getProduct(slug: string): Product | undefined {
   return readAll().find((p) => p.slug === slug);
 }
 
-export function getProductsByCategory(category: CategorySlug): Product[] {
-  return readAll().filter((p) => p.category === category);
+export function getProductsByCategory(
+  category: CategorySlug,
+  audience?: Audience,
+): Product[] {
+  return readAll().filter(
+    (p) => p.category === category && (!audience || p.audience === audience),
+  );
 }
 
 export function getDeals(): Product[] {
@@ -76,6 +96,31 @@ export function searchProducts(query: string): Product[] {
   );
 }
 
+// ── Taxonomy (hide empty categories / audiences) ─────────────────────────────
+
+/** Categories that currently have at least one product, in canonical order. */
+export function getActiveCategories(): CategoryDef[] {
+  const present = new Set(readAll().map((p) => p.category));
+  return CATEGORIES.filter((c) => present.has(c.slug));
+}
+
+export function getActiveCategorySlugs(): CategorySlug[] {
+  return getActiveCategories().map((c) => c.slug);
+}
+
+/** Audiences (men/women/unisex) that have products inside a given category. */
+export function getAudiencesInCategory(category: CategorySlug): Audience[] {
+  const present = new Set(
+    readAll()
+      .filter((p) => p.category === category)
+      .map((p) => p.audience),
+  );
+  // Keep canonical order.
+  return (["men", "women", "unisex"] as Audience[]).filter((a) =>
+    present.has(a),
+  );
+}
+
 // ── Admin CRUD ──────────────────────────────────────────────────────────────
 
 export function saveProduct(product: Product): void {
@@ -88,4 +133,18 @@ export function saveProduct(product: Product): void {
 
 export function deleteProduct(slug: string): void {
   writeAll(readAll().filter((p) => p.slug !== slug));
+}
+
+/** Decrement stock for own products after a paid order (best-effort). */
+export function decrementStock(items: { slug: string; qty: number }[]): void {
+  const all = readAll();
+  let changed = false;
+  for (const { slug, qty } of items) {
+    const p = all.find((x) => x.slug === slug);
+    if (p && p.source === "own" && typeof p.stock === "number") {
+      p.stock = Math.max(0, p.stock - qty);
+      changed = true;
+    }
+  }
+  if (changed) writeAll(all);
 }

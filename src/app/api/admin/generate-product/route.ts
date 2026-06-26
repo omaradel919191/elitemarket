@@ -23,7 +23,6 @@ const CAT_IMAGE: Record<CategorySlug, string> = {
   perfumes: "perfume",
   watches: "watch",
   sunglasses: "sunglasses",
-  beauty: "beauty",
 };
 
 function imageFor(category: CategorySlug): string {

@@ -29,8 +29,8 @@ export async function POST(req: NextRequest) {
       const client = new Anthropic({ apiKey: key });
       const catalog = catalogForPrompt(locale);
       const system =
-        `You are the shopping assistant for Elite Market, a curated luxury affiliate storefront (perfumes, watches, sunglasses, beauty) in the UAE. ` +
-        `You do not sell or take payment — you recommend pieces and link to retailers. ` +
+        `You are the shopping assistant for Elite Market, a curated luxury store (perfumes, watches, sunglasses) in the UAE. ` +
+        `Some pieces are sold and shipped by Elite Market; others link out to retailers like Amazon and Noon. ` +
         `Recommend at most 3 products, chosen ONLY from this catalog: ${JSON.stringify(catalog)}. ` +
         `Reply warmly and briefly in ${locale === "ar" ? "Arabic with NO tashkeel (diacritics)" : "English"}. ` +
         `Respond with ONLY a JSON object, no markdown: {"reply": string, "slugs": string[]}. ` +

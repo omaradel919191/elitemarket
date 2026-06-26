@@ -17,13 +17,11 @@ const CAT_KEYWORDS: Record<CategorySlug, string[]> = {
   perfumes: ["perfume", "parfum", "fragrance", "cologne", "eau de", "عطر", "برفان"],
   watches: ["watch", "chronograph", "automatic", "wrist", "ساعة"],
   sunglasses: ["sunglass", "eyewear", "shades", "aviator", "lens", "نظارة", "نظارات"],
-  beauty: ["cream", "serum", "skin", "beauty", "moistur", "lotion", "care", "كريم", "سيروم", "عناية"],
 };
 const CAT_IMG: Record<CategorySlug, string> = {
   perfumes: "perfume",
   watches: "watch",
   sunglasses: "sunglasses",
-  beauty: "beauty",
 };
 
 function decode(s: string): string {
@@ -192,7 +190,7 @@ export async function POST(req: NextRequest) {
       `You write catalogue entries for Elite Market, a curated luxury affiliate storefront in the UAE. ` +
       `From the scraped retailer product info below, produce a polished bilingual entry. ` +
       `Arabic must use NO tashkeel (no diacritics). Keep it premium, specific and honest — no hype, no invented specs. ` +
-      `Pick "category" from exactly: perfumes | watches | sunglasses | beauty. ` +
+      `Pick "category" from exactly: perfumes | watches | sunglasses. ` +
       `Pick "badge" from exactly: best-pick | luxury-deal | editor-choice. ` +
       `If a real price is given, return it as an integer in "priceAed" (the UAE retailers list AED); else null. ` +
       `Return ONLY a JSON object, no markdown, with keys: ` +

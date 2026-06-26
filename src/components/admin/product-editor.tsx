@@ -50,7 +50,10 @@ export function ProductEditor({
 
   const [f, setF] = useState({
     slug: product?.slug ?? "",
+    source: product?.source ?? "own",
+    audience: product?.audience ?? "unisex",
     category: product?.category ?? "perfumes",
+    stock: product?.stock != null ? String(product.stock) : "",
     brand: product?.brand ?? "ELITE",
     name: product?.name ?? "",
     nameAr: product?.nameAr ?? "",
@@ -152,6 +155,8 @@ export function ProductEditor({
         features: (d.features ?? lines(prev.features)).join("\n"),
         featuresAr: (d.featuresAr ?? lines(prev.featuresAr)).join("\n"),
         image: data.image || prev.image,
+        // Generating from an Amazon/Noon link means this is an affiliate product.
+        source: "affiliate",
         amazonUrl: data.retailer === "amazon" ? u : prev.amazonUrl,
         noonUrl: data.retailer === "noon" ? u : prev.noonUrl,
       }));
@@ -178,7 +183,10 @@ export function ProductEditor({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           slug: f.slug || undefined,
+          source: f.source,
+          audience: f.audience,
           category: f.category,
+          stock: f.stock,
           brand: f.brand,
           name: f.name,
           nameAr: f.nameAr,
@@ -268,6 +276,63 @@ export function ProductEditor({
         </div>
       </div>
 
+      {/* Sale type & audience */}
+      <div className={card}>
+        <h2 className="font-display text-lg font-semibold text-chrome">
+          Sale type & audience
+        </h2>
+        <div className="mt-4 grid gap-4 sm:grid-cols-2">
+          <div>
+            <label className={lbl}>How is it sold?</label>
+            <div className="grid grid-cols-2 gap-2">
+              <button
+                type="button"
+                onClick={() => set("source", "own")}
+                className={`rounded-xl border px-3 py-2.5 text-sm transition-colors ${
+                  f.source === "own"
+                    ? "border-gold bg-gold/10 text-gold"
+                    : "border-line text-ash hover:border-gold/40"
+                }`}
+              >
+                Own product
+                <span className="mt-0.5 block text-[0.65rem] text-ash-dim">
+                  Sold here · Stripe + courier
+                </span>
+              </button>
+              <button
+                type="button"
+                onClick={() => set("source", "affiliate")}
+                className={`rounded-xl border px-3 py-2.5 text-sm transition-colors ${
+                  f.source === "affiliate"
+                    ? "border-gold bg-gold/10 text-gold"
+                    : "border-line text-ash hover:border-gold/40"
+                }`}
+              >
+                Affiliate
+                <span className="mt-0.5 block text-[0.65rem] text-ash-dim">
+                  Links out to Amazon / Noon
+                </span>
+              </button>
+            </div>
+          </div>
+          <div>
+            <label className={lbl}>Audience</label>
+            <select
+              className={field}
+              value={f.audience}
+              onChange={(e) => set("audience", e.target.value as typeof f.audience)}
+            >
+              <option value="men">Men (رجالي)</option>
+              <option value="women">Women (نسائي)</option>
+              <option value="unisex">Unisex (للجنسين)</option>
+            </select>
+            <p className="mt-1.5 text-xs text-ash-dim">
+              Shown as a filter under its category.
+            </p>
+          </div>
+        </div>
+      </div>
+
       {/* Core */}
       <div className={card}>
         <div className="flex items-center justify-between">
@@ -352,9 +417,23 @@ export function ProductEditor({
         <h2 className="font-display text-lg font-semibold text-chrome">Pricing & badge</h2>
         <div className="mt-4 grid gap-4 sm:grid-cols-4">
           <div>
-            <label className={lbl}>Price (AED)</label>
+            <label className={lbl}>
+              Price (AED){f.source === "own" && <span className="text-gold"> *</span>}
+            </label>
             <input className={field} type="number" value={f.priceAed} onChange={(e) => set("priceAed", e.target.value)} />
           </div>
+          {f.source === "own" && (
+            <div>
+              <label className={lbl}>Stock</label>
+              <input
+                className={field}
+                type="number"
+                value={f.stock}
+                onChange={(e) => set("stock", e.target.value)}
+                placeholder="empty = unlimited"
+              />
+            </div>
+          )}
           <div>
             <label className={lbl}>Was (AED)</label>
             <input className={field} type="number" value={f.wasAed} onChange={(e) => set("wasAed", e.target.value)} />
@@ -378,21 +457,23 @@ export function ProductEditor({
         </div>
       </div>
 
-      {/* Retailer links */}
-      <div className={card}>
-        <h2 className="font-display text-lg font-semibold text-chrome">Retailer links</h2>
-        <p className="mt-1 text-xs text-ash-dim">Leave empty to show “coming soon”. Affiliate tags are appended automatically.</p>
-        <div className="mt-4 grid gap-4 sm:grid-cols-2">
-          <div>
-            <label className={lbl}>Amazon URL</label>
-            <input className={field} value={f.amazonUrl} onChange={(e) => set("amazonUrl", e.target.value)} placeholder="https://www.amazon.ae/dp/…" />
-          </div>
-          <div>
-            <label className={lbl}>Noon URL</label>
-            <input className={field} value={f.noonUrl} onChange={(e) => set("noonUrl", e.target.value)} placeholder="https://www.noon.com/…" />
+      {/* Retailer links — affiliate products only */}
+      {f.source === "affiliate" && (
+        <div className={card}>
+          <h2 className="font-display text-lg font-semibold text-chrome">Retailer links</h2>
+          <p className="mt-1 text-xs text-ash-dim">Leave empty to show “coming soon”. Affiliate tags are appended automatically.</p>
+          <div className="mt-4 grid gap-4 sm:grid-cols-2">
+            <div>
+              <label className={lbl}>Amazon URL</label>
+              <input className={field} value={f.amazonUrl} onChange={(e) => set("amazonUrl", e.target.value)} placeholder="https://www.amazon.ae/dp/…" />
+            </div>
+            <div>
+              <label className={lbl}>Noon URL</label>
+              <input className={field} value={f.noonUrl} onChange={(e) => set("noonUrl", e.target.value)} placeholder="https://www.noon.com/…" />
+            </div>
           </div>
         </div>
-      </div>
+      )}
 
       {/* Details */}
       <div className={card}>

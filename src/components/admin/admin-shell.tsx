@@ -1,5 +1,12 @@
 import type { ReactNode } from "react";
-import { LayoutDashboard, Package, Plus, ExternalLink, LogOut } from "lucide-react";
+import {
+  LayoutDashboard,
+  Package,
+  Plus,
+  ShoppingBag,
+  ExternalLink,
+  LogOut,
+} from "lucide-react";
 import { logoutAction } from "@/app/admin/actions";
 import { adminUsesDefaultPassword } from "@/lib/admin-auth";
 
@@ -7,6 +14,7 @@ const NAV = [
   { href: "/admin", label: "Dashboard", Icon: LayoutDashboard },
   { href: "/admin/products", label: "Products", Icon: Package },
   { href: "/admin/products/new", label: "Add Product", Icon: Plus },
+  { href: "/admin/orders", label: "Orders", Icon: ShoppingBag },
 ];
 
 export function AdminShell({

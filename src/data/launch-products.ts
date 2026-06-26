@@ -2,15 +2,18 @@ import type { Product } from "@/lib/catalog-types";
 
 /**
  * First-launch catalogue — ONE real product per category. These are the live
- * launch entries (NOT demo/seed): real luxury copy + on-brand imagery, with
- * the affiliate URLs intentionally LEFT EMPTY for the owner to fill via the
- * admin (or by editing content/products.json). Prices are placeholders the
- * owner updates. Used to seed content/products.json on first run.
+ * launch entries (NOT demo/seed): real luxury copy + on-brand imagery. They are
+ * affiliate entries with the URLs intentionally LEFT EMPTY for the owner to fill
+ * via the admin. The owner adds their OWN products (source: "own", sold on-site
+ * via Stripe + courier) through the admin too. Used to seed products.json on
+ * first run; mount DATA_DIR as a volume so admin edits persist.
  */
 export const LAUNCH_PRODUCTS: Product[] = [
   {
     slug: "luxury-watch",
     category: "watches",
+    source: "affiliate",
+    audience: "men",
     brand: "ELITE",
     name: "Luxury Automatic Watch",
     nameAr: "ساعة فاخرة اوتوماتيك",
@@ -21,6 +24,7 @@ export const LAUNCH_PRODUCTS: Product[] = [
     image: "/brand/products/watch.png",
     rating: null,
     priceAed: 1999,
+    stock: null,
     deal: false,
     wasAed: null,
     badge: "editor-choice",
@@ -40,6 +44,8 @@ export const LAUNCH_PRODUCTS: Product[] = [
   {
     slug: "luxury-perfume",
     category: "perfumes",
+    source: "affiliate",
+    audience: "unisex",
     brand: "ELITE",
     name: "Luxury Extrait de Parfum",
     nameAr: "عطر فاخر اكستريه",
@@ -50,6 +56,7 @@ export const LAUNCH_PRODUCTS: Product[] = [
     image: "/brand/products/perfume.png",
     rating: null,
     priceAed: 499,
+    stock: null,
     deal: false,
     wasAed: null,
     badge: "best-pick",
@@ -69,6 +76,8 @@ export const LAUNCH_PRODUCTS: Product[] = [
   {
     slug: "luxury-sunglasses",
     category: "sunglasses",
+    source: "affiliate",
+    audience: "unisex",
     brand: "ELITE",
     name: "Luxury Gold Sunglasses",
     nameAr: "نظارة شمسية فاخرة بالذهب",
@@ -79,6 +88,7 @@ export const LAUNCH_PRODUCTS: Product[] = [
     image: "/brand/products/sunglasses.png",
     rating: null,
     priceAed: 649,
+    stock: null,
     deal: true,
     wasAed: 850,
     badge: "luxury-deal",
@@ -90,35 +100,6 @@ export const LAUNCH_PRODUCTS: Product[] = [
     consAr: ["مقاس كلاسيكي وليس كبير"],
     features: ["UV400 lenses", "Gold-tone metal frame", "Protective case included"],
     featuresAr: ["عدسات UV400", "اطار معدني ذهبي", "يشمل جراب حماية"],
-    links: [
-      { retailer: "amazon", url: "", priceAed: null },
-      { retailer: "noon", url: "", priceAed: null },
-    ],
-  },
-  {
-    slug: "luxury-skincare",
-    category: "beauty",
-    brand: "ELITE",
-    name: "Luxury Restorative Cream",
-    nameAr: "كريم العناية الفاخر",
-    blurb:
-      "A rich restorative night cream with a gold-engraved lid — overnight recovery, elevated.",
-    blurbAr:
-      "كريم ليلي غني للترميم بغطاء منقوش بالذهب — ترميم ليلي بمستوى ارقى.",
-    image: "/brand/products/beauty.png",
-    rating: null,
-    priceAed: 299,
-    deal: false,
-    wasAed: null,
-    badge: "best-pick",
-    bestFor: "Overnight recovery.",
-    bestForAr: "الترميم اثناء الليل.",
-    pros: ["Deeply hydrating", "Luxurious texture", "Gold-engraved jar"],
-    prosAr: ["ترطيب عميق", "ملمس فاخر", "برطمان منقوش بالذهب"],
-    cons: ["Rich for very oily skin"],
-    consAr: ["غني على البشرة الدهنية جدا"],
-    features: ["50ml jar", "Night formula", "Dermatologist-friendly"],
-    featuresAr: ["برطمان 50 مل", "تركيبة ليلية", "مناسب لطبيب الجلدية"],
     links: [
       { retailer: "amazon", url: "", priceAed: null },
       { retailer: "noon", url: "", priceAed: null },

@@ -1,7 +1,8 @@
-import { Package, Tag, Layers, Link2 } from "lucide-react";
+import { Package, Tag, ShoppingBag, Store } from "lucide-react";
 import { requireAdmin } from "@/lib/admin-auth";
 import { AdminShell } from "@/components/admin/admin-shell";
-import { getAllProducts, getDeals } from "@/lib/catalog";
+import { getAllProducts, getDeals, isOwn } from "@/lib/catalog";
+import { getOrders } from "@/lib/orders";
 import { CATEGORIES } from "@/lib/site";
 
 export default async function AdminDashboardPage() {
@@ -9,13 +10,14 @@ export default async function AdminDashboardPage() {
 
   const products = getAllProducts();
   const deals = getDeals();
-  const linkCount = products.reduce((n, p) => n + p.links.length, 0);
+  const ownCount = products.filter(isOwn).length;
+  const orders = getOrders();
 
   const stats = [
     { label: "Products", value: products.length, Icon: Package },
-    { label: "Categories", value: CATEGORIES.length, Icon: Layers },
+    { label: "Own products", value: ownCount, Icon: Store },
     { label: "Active deals", value: deals.length, Icon: Tag },
-    { label: "Retailer links", value: linkCount, Icon: Link2 },
+    { label: "Orders", value: orders.length, Icon: ShoppingBag },
   ];
 
   const byCategory = CATEGORIES.map((c) => ({
@@ -25,9 +27,12 @@ export default async function AdminDashboardPage() {
 
   const env = [
     { key: "ANTHROPIC_API_KEY", set: !!process.env.ANTHROPIC_API_KEY, note: "AI generator + assistant" },
+    { key: "STRIPE_SECRET_KEY", set: !!process.env.STRIPE_SECRET_KEY, note: "Own-product checkout" },
+    { key: "STRIPE_WEBHOOK_SECRET", set: !!process.env.STRIPE_WEBHOOK_SECRET, note: "Confirm paid orders" },
+    { key: "OTO_REFRESH_TOKEN", set: !!process.env.OTO_REFRESH_TOKEN, note: "Courier shipments" },
     { key: "AMAZON_ASSOCIATE_TAG", set: !!process.env.AMAZON_ASSOCIATE_TAG, note: "Amazon commission" },
     { key: "NOON_AFFILIATE_TAG", set: !!process.env.NOON_AFFILIATE_TAG, note: "Noon commission" },
-    { key: "DATA_DIR", set: !!process.env.DATA_DIR, note: "Persistent product store" },
+    { key: "DATA_DIR", set: !!process.env.DATA_DIR, note: "Persistent product/order store" },
   ];
 
   return (
@@ -89,10 +94,13 @@ export default async function AdminDashboardPage() {
       </div>
 
       <p className="mt-6 rounded-xl border border-line/70 bg-night/40 px-4 py-3 text-xs leading-relaxed text-ash-dim">
-        The catalog is currently a clearly-marked example seed in{" "}
-        <code className="font-mono">src/lib/catalog.ts</code>. Populate real
-        products and connect a database (DATABASE_URL) to go live; set affiliate
-        tags so out-links earn commission.
+        Add <strong className="text-ash">Own products</strong> (sold here via
+        Stripe + courier) or <strong className="text-ash">Affiliate</strong>{" "}
+        products (link out to Amazon/Noon). To take payments set{" "}
+        <code className="font-mono">STRIPE_SECRET_KEY</code> +{" "}
+        <code className="font-mono">STRIPE_WEBHOOK_SECRET</code>; to ship set{" "}
+        <code className="font-mono">OTO_REFRESH_TOKEN</code>. Until then,
+        own-product checkout shows a clear “being set up” message.
       </p>
     </AdminShell>
   );

@@ -1,9 +1,19 @@
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
-import { CATEGORIES } from "@/lib/site";
+import type { CategorySlug } from "@/lib/site";
 import { cn } from "@/lib/utils";
 
-export function CategoryFilter({ active }: { active?: string }) {
+/**
+ * Category chips. Only the categories passed in are shown, so an empty category
+ * never appears. `active` highlights the current one ("All" when undefined).
+ */
+export function CategoryFilter({
+  categories,
+  active,
+}: {
+  categories: CategorySlug[];
+  active?: string;
+}) {
   const t = useTranslations();
   const chip =
     "rounded-full border px-4 py-2 text-sm font-medium transition-colors duration-300";
@@ -15,13 +25,13 @@ export function CategoryFilter({ active }: { active?: string }) {
       <Link href="/shop" className={cn(chip, !active ? on : off)}>
         {t("shop.all")}
       </Link>
-      {CATEGORIES.map((c) => (
+      {categories.map((slug) => (
         <Link
-          key={c.slug}
-          href={`/category/${c.slug}`}
-          className={cn(chip, active === c.slug ? on : off)}
+          key={slug}
+          href={`/category/${slug}`}
+          className={cn(chip, active === slug ? on : off)}
         >
-          {t(`categories.${c.slug}.name`)}
+          {t(`categories.${slug}.name`)}
         </Link>
       ))}
     </div>

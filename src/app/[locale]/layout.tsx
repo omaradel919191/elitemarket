@@ -16,6 +16,7 @@ import { AmbientGold } from "@/components/brand/ambient-gold";
 import { AssistantWidget } from "@/components/assistant/assistant-widget";
 import { JsonLd } from "@/components/seo/json-ld";
 import { SITE } from "@/lib/site";
+import { getActiveCategorySlugs } from "@/lib/catalog";
 import "../globals.css";
 
 const inter = Inter({
@@ -96,6 +97,7 @@ export default async function LocaleLayout({
   }
   setRequestLocale(locale);
   const dir = locale === "ar" ? "rtl" : "ltr";
+  const categories = getActiveCategorySlugs();
 
   return (
     <html
@@ -140,7 +142,7 @@ export default async function LocaleLayout({
             aria-hidden
             className="grain pointer-events-none fixed inset-0 z-[1] opacity-[0.04] mix-blend-overlay"
           />
-          <SiteHeader />
+          <SiteHeader categories={categories} />
           <main className="relative z-10 flex-1">{children}</main>
           <SiteFooter />
           <AssistantWidget />

@@ -4,7 +4,7 @@ import { Container } from "@/components/ui/container";
 import { PageHeader } from "@/components/ui/page-header";
 import { CategoryFilter } from "@/components/shop/category-filter";
 import { ProductGrid } from "@/components/shop/product-grid";
-import { getAllProducts } from "@/lib/catalog";
+import { getAllProducts, getActiveCategorySlugs } from "@/lib/catalog";
 
 export const dynamic = "force-dynamic";
 
@@ -27,6 +27,7 @@ export default async function ShopPage({
   setRequestLocale(locale);
   const t = await getTranslations("shop");
   const products = getAllProducts();
+  const activeCategories = getActiveCategorySlugs();
 
   return (
     <>
@@ -37,7 +38,7 @@ export default async function ShopPage({
       />
       <section className="pb-28">
         <Container>
-          <CategoryFilter />
+          <CategoryFilter categories={activeCategories} />
           <p className="mt-6 text-sm text-ash-dim">
             {t("count", { count: products.length })}
           </p>

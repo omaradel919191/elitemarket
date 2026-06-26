@@ -4,16 +4,20 @@ import { setRequestLocale, getTranslations } from "next-intl/server";
 import { Container } from "@/components/ui/container";
 import { PageHeader } from "@/components/ui/page-header";
 import { CategoryFilter } from "@/components/shop/category-filter";
+import { AudienceFilter } from "@/components/shop/audience-filter";
 import { ProductGrid } from "@/components/shop/product-grid";
-import { CATEGORIES, type CategorySlug } from "@/lib/site";
-import { getProductsByCategory } from "@/lib/catalog";
-
-const SLUGS = CATEGORIES.map((c) => c.slug);
+import { isCategorySlug, type CategorySlug } from "@/lib/site";
+import {
+  getProductsByCategory,
+  getActiveCategorySlugs,
+  getAudiencesInCategory,
+} from "@/lib/catalog";
+import { AUDIENCES, type Audience } from "@/lib/catalog-types";
 
 export const dynamic = "force-dynamic";
 
-function isValid(slug: string): slug is CategorySlug {
-  return (SLUGS as string[]).includes(slug);
+function toAudience(v: string | undefined): Audience | undefined {
+  return AUDIENCES.includes(v as Audience) ? (v as Audience) : undefined;
 }
 
 export async function generateMetadata({
@@ -22,7 +26,7 @@ export async function generateMetadata({
   params: Promise<{ locale: string; slug: string }>;
 }): Promise<Metadata> {
   const { locale, slug } = await params;
-  if (!isValid(slug)) return {};
+  if (!isCategorySlug(slug)) return {};
   const tc = await getTranslations({ locale, namespace: "categories" });
   return {
     title: tc(`${slug}.name`),
@@ -32,15 +36,25 @@ export async function generateMetadata({
 
 export default async function CategoryPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ locale: string; slug: string }>;
+  searchParams: Promise<{ for?: string }>;
 }) {
   const { locale, slug } = await params;
-  if (!isValid(slug)) notFound();
+  if (!isCategorySlug(slug)) notFound();
   setRequestLocale(locale);
+
+  const sp = await searchParams;
+  const audience = toAudience(sp.for);
+
   const tc = await getTranslations("categories");
   const t = await getTranslations("category");
-  const products = getProductsByCategory(slug);
+
+  const cat = slug as CategorySlug;
+  const products = getProductsByCategory(cat, audience);
+  const activeCategories = getActiveCategorySlugs();
+  const audiences = getAudiencesInCategory(cat);
 
   return (
     <>
@@ -51,7 +65,16 @@ export default async function CategoryPage({
       />
       <section className="pb-28">
         <Container>
-          <CategoryFilter active={slug} />
+          <CategoryFilter categories={activeCategories} active={slug} />
+          {audiences.length >= 2 && (
+            <div className="mt-5">
+              <AudienceFilter
+                category={cat}
+                audiences={audiences}
+                active={audience}
+              />
+            </div>
+          )}
           <div className="mt-8">
             <ProductGrid products={products} locale={locale} />
           </div>

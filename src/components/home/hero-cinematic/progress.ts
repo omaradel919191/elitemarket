@@ -42,13 +42,12 @@ export type Clip = {
 
 // The story: product (hold) → transition (dissolve → reassemble) → next
 // product → … → final transition (explode to particles) → EM finale.
+// Three worlds: watches → perfumes → sunglasses → EM finale.
 export const CLIPS: Clip[] = [
-  { key: "watch", video: "/brand/videos/watch.mp4", poster: "/brand/products/watch.png", caption: "watches", in0: -1, in1: 0.02, out0: 0.1, out1: 0.14 },
-  { key: "t1", video: "/brand/videos/t-watch-perfume.mp4", poster: "/brand/products/watch.png", in0: 0.1, in1: 0.14, out0: 0.21, out1: 0.25 },
-  { key: "perfume", video: "/brand/videos/perfume.mp4", poster: "/brand/products/perfume.png", caption: "perfumes", in0: 0.21, in1: 0.25, out0: 0.32, out1: 0.36 },
-  { key: "t2", video: "/brand/videos/t-perfume-sunglasses.mp4", poster: "/brand/products/perfume.png", in0: 0.32, in1: 0.36, out0: 0.43, out1: 0.47 },
-  { key: "sunglasses", video: "/brand/videos/sunglasses.mp4", poster: "/brand/products/sunglasses.png", caption: "sunglasses", in0: 0.43, in1: 0.47, out0: 0.54, out1: 0.58 },
-  { key: "t3", video: "/brand/videos/t-sunglasses-beauty.mp4", poster: "/brand/products/sunglasses.png", in0: 0.54, in1: 0.58, out0: 0.65, out1: 0.69 },
-  { key: "beauty", video: "/brand/videos/beauty.mp4", poster: "/brand/products/beauty.png", caption: "beauty", in0: 0.65, in1: 0.69, out0: 0.76, out1: 0.8 },
-  { key: "t4", video: "/brand/videos/t-beauty-finale.mp4", poster: "/brand/products/beauty.png", in0: 0.76, in1: 0.8, out0: 0.9, out1: 0.96 },
+  { key: "watch", video: "/brand/videos/watch.mp4", poster: "/brand/products/watch.png", caption: "watches", in0: -1, in1: 0.02, out0: 0.13, out1: 0.18 },
+  { key: "t1", video: "/brand/videos/t-watch-perfume.mp4", poster: "/brand/products/watch.png", in0: 0.13, in1: 0.18, out0: 0.28, out1: 0.33 },
+  { key: "perfume", video: "/brand/videos/perfume.mp4", poster: "/brand/products/perfume.png", caption: "perfumes", in0: 0.28, in1: 0.33, out0: 0.45, out1: 0.5 },
+  { key: "t2", video: "/brand/videos/t-perfume-sunglasses.mp4", poster: "/brand/products/perfume.png", in0: 0.45, in1: 0.5, out0: 0.6, out1: 0.65 },
+  { key: "sunglasses", video: "/brand/videos/sunglasses.mp4", poster: "/brand/products/sunglasses.png", caption: "sunglasses", in0: 0.6, in1: 0.65, out0: 0.78, out1: 0.83 },
+  { key: "finale", video: "/brand/videos/t-beauty-finale.mp4", poster: "/brand/products/sunglasses.png", in0: 0.78, in1: 0.83, out0: 0.93, out1: 0.99 },
 ];
