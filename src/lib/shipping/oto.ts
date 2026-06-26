@@ -66,6 +66,31 @@ function pick<T = string>(obj: Record<string, unknown>, ...keys: string[]): T | 
   return null;
 }
 
+// UAE address forms put the emirate in `state`, not `city`. OTO wants a valid
+// city, so we fall back to the emirate and normalize the common Arabic names to
+// English (which OTO matches reliably).
+const UAE_CITY: Record<string, string> = {
+  "عجمان": "Ajman",
+  "دبي": "Dubai",
+  "ابوظبي": "Abu Dhabi",
+  "أبوظبي": "Abu Dhabi",
+  "ابو ظبي": "Abu Dhabi",
+  "أبو ظبي": "Abu Dhabi",
+  "الشارقة": "Sharjah",
+  "الشارقه": "Sharjah",
+  "رأس الخيمة": "Ras Al Khaimah",
+  "راس الخيمة": "Ras Al Khaimah",
+  "الفجيرة": "Fujairah",
+  "الفجيره": "Fujairah",
+  "ام القيوين": "Umm Al Quwain",
+  "أم القيوين": "Umm Al Quwain",
+};
+
+function normalizeCity(value: string | undefined): string {
+  const t = (value || "").trim();
+  return UAE_CITY[t] ?? t;
+}
+
 /**
  * Create an OTO shipment for a paid order. Never throws — always resolves to an
  * OtoResult the caller stores on the order.
@@ -96,8 +121,9 @@ export async function createShipment(order: Order): Promise<OtoResult> {
       email: c.email || "",
       address:
         [c.line1, c.line2].filter(Boolean).join(", ") || c.city || "N/A",
-      district: c.state || "",
-      city: c.city || "",
+      district: c.line2 || "",
+      // UAE: emirate lives in `state`; fall back to it and normalize to English.
+      city: normalizeCity(c.city) || normalizeCity(c.state) || c.country || "",
       country: c.country || "AE",
       postcode: c.postalCode || "",
     },

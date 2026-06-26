@@ -117,6 +117,11 @@ export async function POST(req: NextRequest) {
     phone: piShipping?.phone || details?.phone || "",
     ...mergeAddress(shippingAddr, details?.address),
   };
+  // UAE (and similar) address forms put the city/emirate in `state`, leaving
+  // `city` empty. Use the emirate as the city so the order has somewhere to ship.
+  if (!customer.city?.trim() && customer.state?.trim()) {
+    customer.city = customer.state;
+  }
 
   const order: Order = {
     id: session.id,
