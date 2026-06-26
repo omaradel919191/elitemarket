@@ -84,6 +84,10 @@ export function upsertOrder(order: Order): void {
   writeAll(all);
 }
 
+export function deleteOrder(id: string): void {
+  writeAll(readAll().filter((o) => o.id !== id));
+}
+
 export function updateOrder(id: string, patch: Partial<Order>): Order | undefined {
   const all = readAll();
   const i = all.findIndex((o) => o.id === id);

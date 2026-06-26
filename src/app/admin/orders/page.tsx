@@ -5,6 +5,7 @@ import { getOrders, type OrderStatus } from "@/lib/orders";
 import { isStripeConfigured } from "@/lib/payments/stripe";
 import { isOtoConfigured } from "@/lib/shipping/oto";
 import { RetryShipmentButton } from "@/components/admin/retry-shipment-button";
+import { DeleteOrderButton } from "@/components/admin/delete-order-button";
 import { formatAED } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
@@ -66,6 +67,7 @@ export default async function AdminOrdersPage() {
                 <th className="px-4 py-3 font-medium">Total</th>
                 <th className="px-4 py-3 font-medium">Status</th>
                 <th className="px-4 py-3 font-medium">Tracking</th>
+                <th className="px-4 py-3 font-medium" />
               </tr>
             </thead>
             <tbody>
@@ -140,6 +142,9 @@ export default async function AdminOrdersPage() {
                       ) : (
                         <span className="text-ash-dim">—</span>
                       )}
+                    </td>
+                    <td className="px-4 py-3 text-right align-top">
+                      <DeleteOrderButton orderId={o.id} />
                     </td>
                   </tr>
                 );
