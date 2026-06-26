@@ -88,19 +88,34 @@ export async function POST(req: NextRequest) {
   }
 
   const details = session.customer_details;
-  // Shipping address may live under collected_information (newer API) or the
-  // deprecated shipping_details — read defensively.
+  // The session's shipping fields move between API versions (shipping_details →
+  // collected_information.shipping_details). The PaymentIntent's `shipping`
+  // object reliably carries the collected shipping address across versions, so
+  // retrieve it and use it as the primary source.
+  let piShipping: Stripe.PaymentIntent.Shipping | null = null;
+  const piId =
+    typeof session.payment_intent === "string" ? session.payment_intent : null;
+  if (piId) {
+    try {
+      const pi = await stripe.paymentIntents.retrieve(piId);
+      piShipping = pi.shipping ?? null;
+    } catch {
+      /* fall back to the session's own fields below */
+    }
+  }
+
   const sx = session as unknown as {
     collected_information?: { shipping_details?: { address?: Stripe.Address; name?: string } };
     shipping_details?: { address?: Stripe.Address; name?: string };
   };
   const ship = sx.collected_information?.shipping_details ?? sx.shipping_details;
+  const shippingAddr = piShipping?.address ?? ship?.address;
 
   const customer: ShippingAddress = {
-    name: ship?.name || details?.name || "",
+    name: piShipping?.name || ship?.name || details?.name || "",
     email: details?.email || "",
-    phone: details?.phone || "",
-    ...mergeAddress(ship?.address, details?.address),
+    phone: piShipping?.phone || details?.phone || "",
+    ...mergeAddress(shippingAddr, details?.address),
   };
 
   const order: Order = {
