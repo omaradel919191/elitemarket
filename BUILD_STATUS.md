@@ -1,7 +1,7 @@
 # Elite Market — Build Status & Roadmap
 
 Luxury **affiliate** storefront (no cart/checkout/payments — products redirect to
-Amazon & Noon). Bilingual EN/AR with full RTL. Domain: `eliteperfumesuae.com`.
+Amazon & Noon). Bilingual EN/AR with full RTL. Domain: `eliteperfumeuae.com`.
 
 > Code lives **outside** OneDrive at `C:\Users\omara\elite-market` (avoids sync locks).
 > Brand assets are mirrored from `…\01_PROJECTS\Elite Market\Logo` into `public/brand`.
@@ -53,7 +53,7 @@ Amazon & Noon). Bilingual EN/AR with full RTL. Domain: `eliteperfumesuae.com`.
 
 ## Next (Milestone 4 — deploy) — CREDENTIAL-GATED
 - [ ] VPS deploy (Hostinger + Nginx + SSL) — **needs SSH access + DNS for
-      `eliteperfumesuae.com`**
+      `eliteperfumeuae.com`**
 - [ ] Provider keys: `ANTHROPIC_API_KEY`, Amazon/Noon affiliate tags
 - [ ] Production env + DB provisioning
 

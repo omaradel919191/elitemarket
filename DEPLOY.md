@@ -5,7 +5,7 @@ host's existing **Traefik** reverse proxy. No host ports are published — Traef
 routes to the container over a shared Docker network and terminates TLS.
 
 Target VPS: `72.61.117.194` (Hostinger). Traefik already owns ports 80/443.
-Domain: `eliteperfumesuae.com` (+ `www`).
+Domain: `eliteperfumeuae.com` (+ `www`).
 
 ---
 
@@ -18,7 +18,7 @@ Point the domain at the VPS:
 | A    | `@`  | `72.61.117.194` |
 | A    | `www`| `72.61.117.194` |
 
-Wait for propagation (`dig eliteperfumesuae.com +short` → the VPS IP).
+Wait for propagation (`dig eliteperfumeuae.com +short` → the VPS IP).
 
 ## 2. Get the code on the server
 
@@ -38,7 +38,7 @@ Set at least:
 
 - `ADMIN_PASSWORD` — strong password for the `/admin` dashboard.
 - `AUTH_SECRET` — `openssl rand -base64 48`.
-- `DOMAIN` — `eliteperfumesuae.com`.
+- `DOMAIN` — `eliteperfumeuae.com`.
 - `TRAEFIK_NETWORK` — the **existing** Traefik network name. Confirm it:
   ```bash
   docker network ls                       # find Traefik's network (e.g. n8n_default)
@@ -65,7 +65,7 @@ first request.
 ```bash
 docker compose -f docker-compose.prod.yml ps      # web is healthy
 docker compose -f docker-compose.prod.yml logs -f web
-curl -I https://eliteperfumesuae.com              # 200, valid TLS
+curl -I https://eliteperfumeuae.com              # 200, valid TLS
 ```
 
 Check: homepage loads, `/shop` + a product page render, `/admin/login` works

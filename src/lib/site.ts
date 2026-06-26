@@ -8,9 +8,9 @@ import {
 
 export const SITE = {
   name: "Elite Market",
-  domain: "eliteperfumesuae.com",
-  url: "https://eliteperfumesuae.com",
-  email: "hello@eliteperfumesuae.com",
+  domain: "eliteperfumeuae.com",
+  url: "https://eliteperfumeuae.com",
+  email: "hello@eliteperfumeuae.com",
   taglineEn: "Discover Better. Shop Smarter.",
   taglineAr: "اكتشف افضل. تسوق اذكى.",
   social: {

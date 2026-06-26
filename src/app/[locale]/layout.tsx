@@ -55,7 +55,7 @@ export async function generateMetadata({
   const t = await getTranslations({ locale, namespace: "meta" });
 
   return {
-    metadataBase: new URL("https://eliteperfumesuae.com"),
+    metadataBase: new URL("https://eliteperfumeuae.com"),
     title: { default: t("title"), template: `%s — ${t("brand")}` },
     description: t("description"),
     applicationName: t("brand"),

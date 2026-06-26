@@ -35,7 +35,7 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.docker.network=${TRAEFIK_NETWORK:-n8n_default}"
-      - "traefik.http.routers.elitemarket.rule=Host(`${DOMAIN:-eliteperfumesuae.com}`) || Host(`www.${DOMAIN:-eliteperfumesuae.com}`)"
+      - "traefik.http.routers.elitemarket.rule=Host(`${DOMAIN:-eliteperfumeuae.com}`) || Host(`www.${DOMAIN:-eliteperfumeuae.com}`)"
       - "traefik.http.routers.elitemarket.entrypoints=websecure"
       - "traefik.http.routers.elitemarket.tls=true"
       - "traefik.http.routers.elitemarket.tls.certresolver=${CERT_RESOLVER:-letsencrypt}"
