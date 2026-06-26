@@ -48,6 +48,10 @@ export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }));
 }
 
+// Render at request time so runtime env (e.g. WHATSAPP_NUMBER) and live catalog
+// changes are reflected on every page, including the home + content pages.
+export const dynamic = "force-dynamic";
+
 export async function generateMetadata({
   params,
 }: {
