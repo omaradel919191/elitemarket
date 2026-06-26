@@ -253,6 +253,7 @@
     "added": "Added",
     "buyNow": "Buy now",
     "soldOut": "Sold out",
+    "onlyLeft": "Only {count} left",
     "checkoutSetup": "Online payment is being set up — your item is saved in the cart.",
     "shipsNote": "Sold and shipped by Elite Market across the UAE. Secure checkout — taxes and shipping shown before you pay.",
     "ownPriceNote": "Final price. Taxes and shipping are shown at checkout.",

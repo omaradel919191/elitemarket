@@ -1,6 +1,7 @@
 import { setRequestLocale } from "next-intl/server";
 import { HeroCinematic } from "@/components/home/hero-cinematic";
 import { CategoryShowcase } from "@/components/home/category-showcase";
+import { FeaturedProducts } from "@/components/home/featured-products";
 import { HowItWorks } from "@/components/home/how-it-works";
 import { ValueProps } from "@/components/home/value-props";
 import { CtaBand } from "@/components/home/cta-band";
@@ -17,6 +18,7 @@ export default async function HomePage({
     <>
       <HeroCinematic />
       <CategoryShowcase />
+      <FeaturedProducts locale={locale} />
       <HowItWorks />
       <ValueProps />
       <CtaBand />

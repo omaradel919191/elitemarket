@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { ShoppingBag, Check, Minus, Plus } from "lucide-react";
 import { useCart } from "@/lib/use-cart";
 import {
@@ -33,6 +34,7 @@ export function AddToCart({
 }) {
   const { add, ready } = useCart();
   const router = useRouter();
+  const tp = useTranslations("product");
   const variants = hasVariants(product) ? product.variants! : [];
   const firstBuyable =
     variants.find((v) => v.priceAed > 0 && (v.stock == null || v.stock > 0)) ??
@@ -45,6 +47,8 @@ export function AddToCart({
 
   const unit = resolveUnit(product, variantId);
   const soldOut = typeof unit.stock === "number" && unit.stock <= 0;
+  const lowStock =
+    typeof unit.stock === "number" && unit.stock > 0 && unit.stock <= 5;
   const max = typeof unit.stock === "number" ? unit.stock : 99;
 
   function addToCart() {
@@ -130,6 +134,12 @@ export function AddToCart({
             </p>
           )}
         </div>
+      )}
+
+      {lowStock && (
+        <p className="mb-3 text-sm font-medium text-gold">
+          {tp("onlyLeft", { count: unit.stock as number })}
+        </p>
       )}
 
       {soldOut ? (
