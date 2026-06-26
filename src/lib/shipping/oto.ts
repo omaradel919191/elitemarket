@@ -80,28 +80,33 @@ export async function createShipment(order: Order): Promise<OtoResult> {
   }
 
   const c = order.customer;
+  // OTO expects a digits-only mobile (no "+", spaces or dashes).
+  const mobile = (c.phone || "").replace(/[^\d]/g, "");
   const payload: Record<string, unknown> = {
     orderId: order.id,
     payment_method: "paid", // already captured via Stripe
     amount: order.amountAed,
     amount_due: 0,
+    subtotal: order.amountAed,
     currency: (order.currency || "AED").toUpperCase(),
+    createShipment: true,
     customer: {
       name: c.name || "Customer",
-      mobile: c.phone || "",
+      mobile,
       email: c.email || "",
-      address: [c.line1, c.line2].filter(Boolean).join(", "),
+      address:
+        [c.line1, c.line2].filter(Boolean).join(", ") || c.city || "N/A",
       district: c.state || "",
       city: c.city || "",
       country: c.country || "AE",
       postcode: c.postalCode || "",
     },
     items: order.items.map((it) => ({
-      productId: it.slug,
       name: it.name,
+      sku: it.slug,
       price: it.priceAed,
-      quantity: it.qty,
       rowTotal: it.priceAed * it.qty,
+      quantity: it.qty,
     })),
     ...(process.env.OTO_DELIVERY_OPTION_ID && {
       deliveryOptionId: process.env.OTO_DELIVERY_OPTION_ID,
@@ -121,13 +126,24 @@ export async function createShipment(order: Order): Promise<OtoResult> {
       body: JSON.stringify(payload),
       signal: AbortSignal.timeout(15000),
     });
-    const data = (await res.json().catch(() => ({}))) as Record<string, unknown>;
+    // Capture the raw body so the real OTO validation message reaches the admin.
+    const text = await res.text();
+    let data: Record<string, unknown> = {};
+    try {
+      data = JSON.parse(text);
+    } catch {
+      /* non-JSON body */
+    }
     if (!res.ok || data.success === false) {
+      const msg =
+        (pick(data, "message", "error", "errors") as string) ||
+        text ||
+        `HTTP ${res.status}`;
       return {
         ok: false,
-        error:
-          (pick(data, "message", "error") as string) ||
-          `OTO createOrder HTTP ${res.status}`,
+        error: `OTO ${res.status}: ${
+          typeof msg === "string" ? msg : JSON.stringify(msg)
+        }`.slice(0, 400),
       };
     }
     return {

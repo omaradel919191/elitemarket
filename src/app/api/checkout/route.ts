@@ -30,7 +30,12 @@ export async function POST(req: NextRequest) {
 
   const locale = body.locale === "ar" ? "ar" : "en";
   const lines = Array.isArray(body.lines) ? body.lines : [];
-  const origin = req.nextUrl.origin;
+  // Behind Traefik the internal request origin is http://0.0.0.0:3000, which is
+  // useless to Stripe (success/cancel redirects + product images). Use the
+  // public site URL instead, falling back to the request origin in dev.
+  const origin = (
+    process.env.NEXT_PUBLIC_SITE_URL?.trim() || req.nextUrl.origin
+  ).replace(/\/+$/, "");
 
   const lineItems: import("stripe").Stripe.Checkout.SessionCreateParams.LineItem[] =
     [];

@@ -4,6 +4,7 @@ import { AdminShell } from "@/components/admin/admin-shell";
 import { getOrders, type OrderStatus } from "@/lib/orders";
 import { isStripeConfigured } from "@/lib/payments/stripe";
 import { isOtoConfigured } from "@/lib/shipping/oto";
+import { RetryShipmentButton } from "@/components/admin/retry-shipment-button";
 import { formatAED } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
@@ -109,11 +110,15 @@ export default async function AdminOrdersPage() {
                         {s.label}
                       </span>
                       {o.status === "shipping_failed" && o.shipping.error && (
-                        <span className="mt-1 flex items-center gap-1 text-[0.65rem] text-danger">
-                          <AlertTriangle className="h-3 w-3" />
-                          {o.shipping.error}
+                        <span className="mt-1 flex items-start gap-1 text-[0.65rem] text-danger">
+                          <AlertTriangle className="mt-0.5 h-3 w-3 shrink-0" />
+                          <span className="max-w-[18rem] break-words">{o.shipping.error}</span>
                         </span>
                       )}
+                      {otoOn &&
+                        (o.status === "paid" || o.status === "shipping_failed") && (
+                          <RetryShipmentButton orderId={o.id} />
+                        )}
                     </td>
                     <td className="px-4 py-3 text-ash">
                       {o.shipping.trackingNumber ? (
