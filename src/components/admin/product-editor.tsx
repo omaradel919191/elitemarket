@@ -2,9 +2,9 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Sparkles, Save, Trash2, Link2, Wand2, Upload } from "lucide-react";
+import { Sparkles, Save, Trash2, Link2, Wand2, Upload, Plus } from "lucide-react";
 import { CATEGORIES } from "@/lib/site";
-import { getRetailerLink, type Product } from "@/lib/catalog-types";
+import { getRetailerLink, type Product, type Variant } from "@/lib/catalog-types";
 
 const BADGES = ["", "best-pick", "luxury-deal", "editor-choice"] as const;
 
@@ -82,6 +82,7 @@ export function ProductEditor({
     blurbAr: product?.blurbAr ?? "",
     image: product?.image ?? "/brand/products/perfume.png",
     images: (product?.images ?? []) as string[],
+    variants: (product?.variants ?? []) as Variant[],
     priceAed: product?.priceAed != null ? String(product.priceAed) : "",
     wasAed: product?.wasAed != null ? String(product.wasAed) : "",
     rating: product?.rating != null ? String(product.rating) : "",
@@ -101,6 +102,25 @@ export function ProductEditor({
 
   function set<K extends keyof typeof f>(k: K, v: (typeof f)[K]) {
     setF((prev) => ({ ...prev, [k]: v }));
+  }
+
+  function addVariant() {
+    setF((prev) => ({
+      ...prev,
+      variants: [
+        ...prev.variants,
+        { id: crypto.randomUUID(), name: "", priceAed: 0, stock: null },
+      ],
+    }));
+  }
+  function updateVariant(i: number, patch: Partial<Variant>) {
+    setF((prev) => ({
+      ...prev,
+      variants: prev.variants.map((v, idx) => (idx === i ? { ...v, ...patch } : v)),
+    }));
+  }
+  function removeVariant(i: number) {
+    setF((prev) => ({ ...prev, variants: prev.variants.filter((_, idx) => idx !== i) }));
   }
 
   async function aiFill() {
@@ -216,6 +236,7 @@ export function ProductEditor({
           blurbAr: f.blurbAr,
           image: f.image,
           images: f.images,
+          variants: f.variants,
           priceAed: f.priceAed,
           wasAed: f.wasAed,
           rating: f.rating,
@@ -518,6 +539,67 @@ export function ProductEditor({
           </label>
         </div>
       </div>
+
+      {/* Options / variants — own products only */}
+      {f.source === "own" && (
+        <div className={card}>
+          <div className="flex items-center justify-between">
+            <h2 className="font-display text-lg font-semibold text-chrome">
+              Options / sizes
+            </h2>
+            <button
+              type="button"
+              onClick={addVariant}
+              className="inline-flex items-center gap-1.5 rounded-full border border-gold/30 px-3 py-1.5 text-xs text-gold transition-colors hover:bg-gold/[0.08]"
+            >
+              <Plus className="h-3.5 w-3.5" />
+              Add option
+            </button>
+          </div>
+          <p className="mt-1 text-xs text-ash-dim">
+            Optional. Add sizes (e.g. 50ml, 100ml) each with its own price + stock.
+            When set, the customer picks one and the base price above shows as “from”.
+          </p>
+          {f.variants.length > 0 && (
+            <div className="mt-4 space-y-2">
+              {f.variants.map((v, i) => (
+                <div key={v.id} className="grid grid-cols-[1fr_6rem_6rem_auto] items-center gap-2">
+                  <input
+                    className={field}
+                    value={v.name}
+                    onChange={(e) => updateVariant(i, { name: e.target.value })}
+                    placeholder="50ml"
+                  />
+                  <input
+                    className={field}
+                    type="number"
+                    value={v.priceAed || ""}
+                    onChange={(e) => updateVariant(i, { priceAed: Number(e.target.value) || 0 })}
+                    placeholder="Price"
+                  />
+                  <input
+                    className={field}
+                    type="number"
+                    value={v.stock ?? ""}
+                    onChange={(e) =>
+                      updateVariant(i, { stock: e.target.value === "" ? null : Number(e.target.value) })
+                    }
+                    placeholder="Stock"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => removeVariant(i)}
+                    aria-label="Remove"
+                    className="flex h-11 w-11 items-center justify-center rounded-xl border border-line text-ash-dim transition-colors hover:border-danger/40 hover:text-danger"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Retailer links — affiliate products only */}
       {f.source === "affiliate" && (

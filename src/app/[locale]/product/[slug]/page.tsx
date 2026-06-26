@@ -17,6 +17,8 @@ import {
   localized,
   isOwn,
   galleryImages,
+  hasVariants,
+  displayPrice,
 } from "@/lib/catalog";
 import { SITE } from "@/lib/site";
 import { formatAED } from "@/lib/utils";
@@ -55,6 +57,8 @@ export default async function ProductPage({
   const tb = await getTranslations("badge");
   const l = localized(product, locale);
   const own = isOwn(product);
+  const variantProduct = own && hasVariants(product);
+  const priceToShow = displayPrice(product);
   const related = getRelated(product);
   const lp = `/${locale}`;
   const badgeLabel = product.badge
@@ -154,12 +158,15 @@ export default async function ProductPage({
             )}
             <p className="mt-5 text-base leading-relaxed text-ash">{l.blurb}</p>
 
-            {product.priceAed != null && (
+            {priceToShow != null && (
               <div className="mt-6 flex items-baseline gap-3">
+                {variantProduct && (
+                  <span className="text-base text-ash">{t("from")}</span>
+                )}
                 <span className="font-display text-3xl font-semibold text-chrome">
-                  {formatAED(product.priceAed, locale)}
+                  {formatAED(priceToShow, locale)}
                 </span>
-                {product.deal && product.wasAed != null && (
+                {product.deal && product.wasAed != null && !variantProduct && (
                   <span className="text-base text-ash-dim line-through">
                     {formatAED(product.wasAed, locale)}
                   </span>
@@ -194,6 +201,7 @@ export default async function ProductPage({
                       buyNow: t("buyNow"),
                       soldOut: t("soldOut"),
                       setup: t("checkoutSetup"),
+                      option: t("option"),
                     }}
                   />
                   <p className="mt-3 text-xs leading-relaxed text-ash-dim">

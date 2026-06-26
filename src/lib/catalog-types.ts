@@ -31,6 +31,14 @@ export type RetailerLink = {
   priceAed?: number | null;
 };
 
+/** An own-product option (e.g. perfume size) with its own price + stock. */
+export type Variant = {
+  id: string;
+  name: string; // e.g. "50ml"
+  priceAed: number;
+  stock?: number | null; // null/undefined = not tracked
+};
+
 export type Product = {
   slug: string;
   category: CategorySlug;
@@ -51,6 +59,8 @@ export type Product = {
   priceAed?: number | null;
   /** Own products: units in stock. null/undefined = not tracked (always in stock). */
   stock?: number | null;
+  /** Own products: optional options (e.g. sizes), each with its own price/stock. */
+  variants?: Variant[];
   deal?: boolean;
   wasAed?: number | null;
   badge?: Badge | null;
@@ -91,6 +101,7 @@ export function normalizeProduct(p: Partial<Product> & { slug: string }): Produc
     audience:
       p.audience === "men" || p.audience === "women" ? p.audience : "unisex",
     images: Array.isArray(p.images) ? p.images.filter(Boolean) : [],
+    variants: Array.isArray(p.variants) ? p.variants : [],
     links: Array.isArray(p.links) ? p.links : [],
   } as Product;
 }
@@ -100,19 +111,50 @@ export function isOwn(p: Product): boolean {
   return p.source === "own";
 }
 
+/** Whether a product sells via variants (sizes/options). */
+export function hasVariants(p: Product): boolean {
+  return !!p.variants && p.variants.length > 0;
+}
+
+export function variantById(p: Product, id: string | undefined): Variant | undefined {
+  if (!id) return undefined;
+  return p.variants?.find((v) => v.id === id);
+}
+
+function variantBuyable(v: Variant): boolean {
+  return v.priceAed > 0 && (v.stock == null || v.stock > 0);
+}
+
+/** Price to show on cards/listing — for variant products, the lowest option. */
+export function displayPrice(p: Product): number | null {
+  if (hasVariants(p)) {
+    const prices = p.variants!.map((v) => v.priceAed).filter((n) => n > 0);
+    return prices.length ? Math.min(...prices) : null;
+  }
+  return p.priceAed ?? null;
+}
+
 /** Own product that can actually be added to cart right now. */
 export function isBuyable(p: Product): boolean {
-  return (
-    p.source === "own" &&
-    p.priceAed != null &&
-    p.priceAed > 0 &&
-    (p.stock == null || p.stock > 0)
-  );
+  if (p.source !== "own") return false;
+  if (hasVariants(p)) return p.variants!.some(variantBuyable);
+  return p.priceAed != null && p.priceAed > 0 && (p.stock == null || p.stock > 0);
 }
 
 /** Own product that is configured but out of stock. */
 export function isSoldOut(p: Product): boolean {
-  return p.source === "own" && typeof p.stock === "number" && p.stock <= 0;
+  if (p.source !== "own") return false;
+  if (hasVariants(p)) return !p.variants!.some(variantBuyable);
+  return typeof p.stock === "number" && p.stock <= 0;
+}
+
+/** Resolve the effective price/stock/label for a product + optional variant. */
+export function resolveUnit(p: Product, variantId?: string) {
+  const v = variantById(p, variantId);
+  if (v) {
+    return { priceAed: v.priceAed, stock: v.stock ?? null, variantName: v.name, variant: v };
+  }
+  return { priceAed: p.priceAed ?? null, stock: p.stock ?? null, variantName: "", variant: undefined };
 }
 
 /** Cover + extra images, deduped, cover first. */

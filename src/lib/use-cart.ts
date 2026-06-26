@@ -4,15 +4,21 @@ import { useCallback, useEffect, useState } from "react";
 
 /**
  * Client-only cart persisted to localStorage. Holds only OUR OWN products
- * (affiliate items link out and never enter the cart). Stores slug + qty; the
- * server re-prices from the catalog at checkout so the client can never set a
- * price. A custom event keeps header badge, cart page and buttons in sync.
+ * (affiliate items link out and never enter the cart). Stores slug + optional
+ * variantId + qty; the server re-prices from the catalog at checkout so the
+ * client can never set a price. A custom event keeps header badge, cart page and
+ * buttons in sync. A line is keyed by slug + variantId so different sizes of the
+ * same product are separate lines.
  */
 
 const KEY = "em_cart";
 const EVT = "em-cart-change";
 
-export type CartLine = { slug: string; qty: number };
+export type CartLine = { slug: string; variantId?: string; qty: number };
+
+function lineKey(slug: string, variantId?: string) {
+  return `${slug}|${variantId ?? ""}`;
+}
 
 function read(): CartLine[] {
   if (typeof window === "undefined") return [];
@@ -48,22 +54,24 @@ export function useCart() {
     };
   }, []);
 
-  const add = useCallback((slug: string, qty = 1) => {
+  const add = useCallback((slug: string, qty = 1, variantId?: string) => {
     const cur = read();
-    const found = cur.find((l) => l.slug === slug);
+    const found = cur.find((l) => lineKey(l.slug, l.variantId) === lineKey(slug, variantId));
     if (found) found.qty = Math.min(99, found.qty + qty);
-    else cur.push({ slug, qty: Math.min(99, Math.max(1, qty)) });
+    else cur.push({ slug, variantId, qty: Math.min(99, Math.max(1, qty)) });
     write(cur);
   }, []);
 
-  const setQty = useCallback((slug: string, qty: number) => {
-    const cur = read().filter((l) => l.slug !== slug);
-    if (qty > 0) cur.push({ slug, qty: Math.min(99, qty) });
+  const setQty = useCallback((slug: string, qty: number, variantId?: string) => {
+    const cur = read().filter(
+      (l) => lineKey(l.slug, l.variantId) !== lineKey(slug, variantId),
+    );
+    if (qty > 0) cur.push({ slug, variantId, qty: Math.min(99, qty) });
     write(cur);
   }, []);
 
-  const remove = useCallback((slug: string) => {
-    write(read().filter((l) => l.slug !== slug));
+  const remove = useCallback((slug: string, variantId?: string) => {
+    write(read().filter((l) => lineKey(l.slug, l.variantId) !== lineKey(slug, variantId)));
   }, []);
 
   const clear = useCallback(() => write([]), []);

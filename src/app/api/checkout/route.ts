@@ -1,5 +1,11 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { getProduct, isBuyable, localized } from "@/lib/catalog";
+import {
+  getProduct,
+  localized,
+  hasVariants,
+  variantById,
+  resolveUnit,
+} from "@/lib/catalog";
 import { getStripe, CHECKOUT_CURRENCY } from "@/lib/payments/stripe";
 import { validateCoupon } from "@/lib/coupons";
 
@@ -23,7 +29,7 @@ export async function POST(req: NextRequest) {
   }
 
   let body: {
-    lines?: { slug: string; qty: number }[];
+    lines?: { slug: string; qty: number; variantId?: string }[];
     locale?: string;
     code?: string;
   };
@@ -44,20 +50,28 @@ export async function POST(req: NextRequest) {
 
   const lineItems: import("stripe").Stripe.Checkout.SessionCreateParams.LineItem[] =
     [];
-  const meta: { slug: string; qty: number }[] = [];
+  const meta: { slug: string; qty: number; variantId?: string }[] = [];
   let subtotalAed = 0;
 
   for (const line of lines) {
     const qty = Math.min(99, Math.max(1, Math.floor(Number(line?.qty) || 0)));
     const product = getProduct(String(line?.slug ?? ""));
-    if (!product || !isBuyable(product) || qty < 1) continue;
-    const name = localized(product, locale).name;
-    subtotalAed += (product.priceAed as number) * qty;
+    if (!product || product.source !== "own" || qty < 1) continue;
+    const variantId = line?.variantId ? String(line.variantId) : undefined;
+    // Variant products require a valid selected option.
+    if (hasVariants(product) && !variantById(product, variantId)) continue;
+    const unit = resolveUnit(product, variantId);
+    if (unit.priceAed == null || unit.priceAed <= 0) continue;
+    if (typeof unit.stock === "number" && unit.stock <= 0) continue;
+
+    const base = localized(product, locale).name;
+    const name = unit.variantName ? `${base} — ${unit.variantName}` : base;
+    subtotalAed += unit.priceAed * qty;
     lineItems.push({
       quantity: qty,
       price_data: {
         currency: CHECKOUT_CURRENCY,
-        unit_amount: Math.round((product.priceAed as number) * 100),
+        unit_amount: Math.round(unit.priceAed * 100),
         product_data: {
           name,
           images: product.image.startsWith("/")
@@ -65,11 +79,11 @@ export async function POST(req: NextRequest) {
             : product.image
               ? [product.image]
               : undefined,
-          metadata: { slug: product.slug },
+          metadata: { slug: product.slug, variant: variantId ?? "" },
         },
       },
     });
-    meta.push({ slug: product.slug, qty });
+    meta.push({ slug: product.slug, qty, ...(variantId && { variantId }) });
   }
 
   if (lineItems.length === 0) {
@@ -125,6 +139,10 @@ export async function POST(req: NextRequest) {
       shipping_address_collection: { allowed_countries: COUNTRIES },
       phone_number_collection: { enabled: true },
       billing_address_collection: "auto",
+      // Abandoned-cart recovery: Stripe creates a recovery URL and (when the
+      // "Recover abandoned carts" email is enabled in the Stripe Dashboard)
+      // emails customers who started but didn't finish.
+      after_expiration: { recovery: { enabled: true } },
       ...(shippingOptions && { shipping_options: shippingOptions }),
       ...(discounts && { discounts }),
       success_url: `${origin}/${locale}/checkout/success?session_id={CHECKOUT_SESSION_ID}`,

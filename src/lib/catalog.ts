@@ -135,13 +135,22 @@ export function deleteProduct(slug: string): void {
   writeAll(readAll().filter((p) => p.slug !== slug));
 }
 
-/** Decrement stock for own products after a paid order (best-effort). */
-export function decrementStock(items: { slug: string; qty: number }[]): void {
+/** Decrement stock for own products/variants after a paid order (best-effort). */
+export function decrementStock(
+  items: { slug: string; qty: number; variantId?: string }[],
+): void {
   const all = readAll();
   let changed = false;
-  for (const { slug, qty } of items) {
+  for (const { slug, qty, variantId } of items) {
     const p = all.find((x) => x.slug === slug);
-    if (p && p.source === "own" && typeof p.stock === "number") {
+    if (!p || p.source !== "own") continue;
+    if (variantId && p.variants?.length) {
+      const v = p.variants.find((x) => x.id === variantId);
+      if (v && typeof v.stock === "number") {
+        v.stock = Math.max(0, v.stock - qty);
+        changed = true;
+      }
+    } else if (typeof p.stock === "number") {
       p.stock = Math.max(0, p.stock - qty);
       changed = true;
     }

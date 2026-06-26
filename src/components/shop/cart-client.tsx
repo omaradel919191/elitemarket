@@ -5,7 +5,7 @@ import Image from "next/image";
 import { Minus, Plus, Trash2, ShoppingBag, Lock } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import { useCart } from "@/lib/use-cart";
-import { localized, type Product } from "@/lib/catalog-types";
+import { localized, resolveUnit, type Product } from "@/lib/catalog-types";
 import { formatAED } from "@/lib/utils";
 
 export function CartClient({
@@ -42,15 +42,20 @@ export function CartClient({
 
   const bySlug = new Map(products.map((p) => [p.slug, p]));
   const items = lines
-    .map((l) => ({ product: bySlug.get(l.slug), qty: l.qty }))
-    .filter((x): x is { product: Product; qty: number } => !!x.product);
+    .map((l) => {
+      const product = bySlug.get(l.slug);
+      if (!product) return null;
+      const unit = resolveUnit(product, l.variantId);
+      return { product, variantId: l.variantId, qty: l.qty, unit };
+    })
+    .filter((x): x is NonNullable<typeof x> => !!x);
 
-  const subtotal = items.reduce(
-    (s, x) => s + (x.product.priceAed ?? 0) * x.qty,
-    0,
-  );
+  const subtotal = items.reduce((s, x) => s + (x.unit.priceAed ?? 0) * x.qty, 0);
   const discount = applied ? Math.min(applied.discountAed, subtotal) : 0;
   const total = Math.max(0, subtotal - discount);
+
+  const orderLines = () =>
+    items.map((x) => ({ slug: x.product.slug, qty: x.qty, variantId: x.variantId }));
 
   async function applyCode() {
     if (codeBusy || !code.trim()) return;
@@ -60,10 +65,7 @@ export function CartClient({
       const res = await fetch("/api/coupon/validate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          code,
-          lines: items.map((x) => ({ slug: x.product.slug, qty: x.qty })),
-        }),
+        body: JSON.stringify({ code, lines: orderLines() }),
       });
       const data = await res.json();
       if (data.ok) {
@@ -88,11 +90,7 @@ export function CartClient({
       const res = await fetch("/api/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          lines: items.map((x) => ({ slug: x.product.slug, qty: x.qty })),
-          locale,
-          code: applied?.code,
-        }),
+        body: JSON.stringify({ lines: orderLines(), locale, code: applied?.code }),
       });
       if (res.status === 503) {
         setMsg(labels.setup);
@@ -132,25 +130,19 @@ export function CartClient({
   return (
     <div className="grid gap-8 lg:grid-cols-3">
       <ul className="space-y-4 lg:col-span-2">
-        {items.map(({ product, qty }) => {
+        {items.map(({ product, variantId, qty, unit }) => {
           const l = localized(product, locale);
-          const max = typeof product.stock === "number" ? product.stock : 99;
+          const max = typeof unit.stock === "number" ? unit.stock : 99;
           return (
             <li
-              key={product.slug}
+              key={`${product.slug}|${variantId ?? ""}`}
               className="flex gap-4 rounded-2xl border border-line/70 bg-surface/40 p-4"
             >
               <Link
                 href={`/product/${product.slug}`}
                 className="relative h-24 w-24 shrink-0 overflow-hidden rounded-xl bg-black"
               >
-                <Image
-                  src={product.image}
-                  alt={l.name}
-                  fill
-                  sizes="96px"
-                  className="object-contain p-2"
-                />
+                <Image src={product.image} alt={l.name} fill sizes="96px" className="object-contain p-2" />
               </Link>
               <div className="flex flex-1 flex-col">
                 <p className="text-[0.65rem] font-semibold uppercase tracking-[0.18em] text-gold">
@@ -162,24 +154,25 @@ export function CartClient({
                 >
                   {l.name}
                 </Link>
+                {unit.variantName && (
+                  <span className="mt-0.5 text-xs text-ash-dim">{unit.variantName}</span>
+                )}
                 <div className="mt-auto flex items-center justify-between pt-3">
                   <div className="inline-flex items-center rounded-full border border-line/70">
                     <button
                       type="button"
                       aria-label="−"
-                      onClick={() => setQty(product.slug, Math.max(1, qty - 1))}
+                      onClick={() => setQty(product.slug, Math.max(1, qty - 1), variantId)}
                       disabled={qty <= 1}
                       className={stepBtn}
                     >
                       <Minus className="h-3.5 w-3.5" />
                     </button>
-                    <span className="w-7 text-center text-sm text-chrome">
-                      {qty}
-                    </span>
+                    <span className="w-7 text-center text-sm text-chrome">{qty}</span>
                     <button
                       type="button"
                       aria-label="+"
-                      onClick={() => setQty(product.slug, Math.min(max, qty + 1))}
+                      onClick={() => setQty(product.slug, Math.min(max, qty + 1), variantId)}
                       disabled={qty >= max}
                       className={stepBtn}
                     >
@@ -187,14 +180,14 @@ export function CartClient({
                     </button>
                   </div>
                   <span className="font-display text-base font-semibold text-chrome">
-                    {formatAED((product.priceAed ?? 0) * qty, locale)}
+                    {formatAED((unit.priceAed ?? 0) * qty, locale)}
                   </span>
                 </div>
               </div>
               <button
                 type="button"
                 aria-label={labels.remove}
-                onClick={() => remove(product.slug)}
+                onClick={() => remove(product.slug, variantId)}
                 className="self-start text-ash-dim transition-colors hover:text-danger"
               >
                 <Trash2 className="h-4 w-4" />
@@ -213,7 +206,6 @@ export function CartClient({
             </span>
           </div>
 
-          {/* Promo code */}
           <div className="mt-4">
             <div className="flex gap-2">
               <input

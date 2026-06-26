@@ -1,7 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import type Stripe from "stripe";
 import { getStripe } from "@/lib/payments/stripe";
-import { getProduct, localized, decrementStock } from "@/lib/catalog";
+import { getProduct, localized, decrementStock, resolveUnit } from "@/lib/catalog";
 import {
   upsertOrder,
   updateOrder,
@@ -71,7 +71,7 @@ export async function POST(req: NextRequest) {
   // Rebuild items from our metadata, re-priced from the catalog (never trust
   // amounts from the client).
   const locale = (session.metadata?.locale as string) === "ar" ? "ar" : "en";
-  let cart: { slug: string; qty: number }[] = [];
+  let cart: { slug: string; qty: number; variantId?: string }[] = [];
   try {
     cart = JSON.parse(session.metadata?.cart ?? "[]");
   } catch {
@@ -80,12 +80,16 @@ export async function POST(req: NextRequest) {
   const items: OrderItem[] = [];
   for (const c of cart) {
     const p = getProduct(c.slug);
-    if (!p || p.priceAed == null) continue;
+    if (!p) continue;
+    const unit = resolveUnit(p, c.variantId);
+    if (unit.priceAed == null) continue;
+    const base = localized(p, locale).name;
     items.push({
       slug: p.slug,
-      name: localized(p, locale).name,
+      ...(c.variantId && { variantId: c.variantId }),
+      name: unit.variantName ? `${base} — ${unit.variantName}` : base,
       qty: Math.max(1, Math.floor(Number(c.qty) || 1)),
-      priceAed: p.priceAed,
+      priceAed: unit.priceAed,
     });
   }
 
@@ -137,7 +141,9 @@ export async function POST(req: NextRequest) {
     shipping: { provider: isOtoConfigured() ? "oto" : null },
   };
   upsertOrder(order);
-  decrementStock(items.map((i) => ({ slug: i.slug, qty: i.qty })));
+  decrementStock(
+    items.map((i) => ({ slug: i.slug, qty: i.qty, variantId: i.variantId })),
+  );
 
   // Hand to the courier (best-effort; never fails the webhook).
   if (isOtoConfigured()) {

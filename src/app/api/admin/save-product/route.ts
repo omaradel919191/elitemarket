@@ -7,11 +7,35 @@ import {
   type Badge,
   type Product,
   type ProductSource,
+  type Variant,
 } from "@/lib/catalog-types";
 import { CATEGORIES, type CategorySlug } from "@/lib/site";
 
 const CATS = CATEGORIES.map((c) => c.slug) as string[];
 const BADGES: Badge[] = ["best-pick", "luxury-deal", "editor-choice"];
+
+function parseVariants(v: unknown): Variant[] {
+  if (!Array.isArray(v)) return [];
+  return v
+    .map((x) => {
+      const o = (x ?? {}) as Record<string, unknown>;
+      const name = String(o.name ?? "").trim();
+      const price = Number(o.priceAed);
+      if (!name || !Number.isFinite(price) || price <= 0) return null;
+      const stockRaw = o.stock;
+      const stock =
+        stockRaw === "" || stockRaw == null || !Number.isFinite(Number(stockRaw))
+          ? null
+          : Math.floor(Number(stockRaw));
+      return {
+        id: String(o.id ?? "").trim() || crypto.randomUUID(),
+        name,
+        priceAed: Math.round(price),
+        stock,
+      } as Variant;
+    })
+    .filter((x): x is Variant => x !== null);
+}
 
 function slugify(s: string): string {
   return s
@@ -63,10 +87,12 @@ export async function POST(req: NextRequest) {
     ? (b.audience as Audience)
     : "unisex";
 
-  // Own products must have a price to be buyable.
-  if (source === "own" && num(b.priceAed) == null) {
+  const variants = source === "own" ? parseVariants(b.variants) : [];
+
+  // Own products must be buyable: either a base price, or at least one variant.
+  if (source === "own" && num(b.priceAed) == null && variants.length === 0) {
     return NextResponse.json(
-      { error: "own products need a price" },
+      { error: "own products need a price or at least one variant" },
       { status: 400 },
     );
   }
@@ -77,6 +103,7 @@ export async function POST(req: NextRequest) {
     audience,
     category: category as CategorySlug,
     stock: source === "own" ? num(b.stock) : null,
+    variants,
     brand,
     name,
     nameAr: String(b.nameAr ?? "").trim(),

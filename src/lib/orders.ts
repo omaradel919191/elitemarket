@@ -13,6 +13,7 @@ const FILE = path.join(DATA_DIR, "orders.json");
 
 export type OrderItem = {
   slug: string;
+  variantId?: string;
   name: string;
   qty: number;
   priceAed: number;

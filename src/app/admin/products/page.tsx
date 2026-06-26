@@ -15,13 +15,21 @@ export default async function AdminProductsPage() {
     <AdminShell active="/admin/products" title="Products">
       <div className="mb-6 flex items-center justify-between gap-3">
         <p className="text-sm text-ash">{products.length} products</p>
-        <a
-          href="/admin/products/new"
-          className="inline-flex items-center gap-2 rounded-full bg-gradient-to-b from-gold-soft to-gold-deep px-5 py-2.5 text-sm font-medium text-ink transition-transform hover:-translate-y-0.5"
-        >
-          <Plus className="h-4 w-4" />
-          Add product
-        </a>
+        <div className="flex items-center gap-2">
+          <a
+            href="/admin/products/import"
+            className="inline-flex items-center gap-2 rounded-full border border-line px-4 py-2.5 text-sm text-ash transition-colors hover:border-gold/40 hover:text-gold"
+          >
+            Import CSV
+          </a>
+          <a
+            href="/admin/products/new"
+            className="inline-flex items-center gap-2 rounded-full bg-gradient-to-b from-gold-soft to-gold-deep px-5 py-2.5 text-sm font-medium text-ink transition-transform hover:-translate-y-0.5"
+          >
+            <Plus className="h-4 w-4" />
+            Add product
+          </a>
+        </div>
       </div>
 
       <div className="overflow-x-auto rounded-2xl border border-line/70">

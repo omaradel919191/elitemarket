@@ -3,7 +3,7 @@ import { ArrowUpRight } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import { Rating } from "./rating";
 import { WishlistButton } from "./wishlist-button";
-import { localized, type Product } from "@/lib/catalog-types";
+import { localized, displayPrice, hasVariants, type Product } from "@/lib/catalog-types";
 import { formatAED } from "@/lib/utils";
 
 export function ProductCard({
@@ -66,12 +66,12 @@ export function ProductCard({
             {product.rating != null && (
               <Rating value={product.rating} className="mb-2" />
             )}
-            {product.priceAed != null && (
+            {displayPrice(product) != null && (
               <div className="flex items-baseline gap-2">
                 <span className="font-display text-lg font-semibold text-chrome">
-                  {formatAED(product.priceAed, locale)}
+                  {formatAED(displayPrice(product) as number, locale)}
                 </span>
-                {product.deal && product.wasAed != null && (
+                {product.deal && product.wasAed != null && !hasVariants(product) && (
                   <span className="text-xs text-ash-dim line-through">
                     {formatAED(product.wasAed, locale)}
                   </span>
