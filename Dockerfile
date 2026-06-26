@@ -1,11 +1,13 @@
 # syntax=docker/dockerfile:1
 # Elite Market — production image (Next.js 16 standalone output).
 
-# ---- deps: install with a clean, reproducible lockfile ----
+# ---- deps: install dependencies ----
+# Use `npm install` (not `npm ci`) so the Linux-specific native deps are
+# resolved at build time — the lockfile is generated on a different platform.
 FROM node:22-alpine AS deps
 WORKDIR /app
 COPY package.json package-lock.json ./
-RUN npm ci
+RUN npm install --no-audit --no-fund
 
 # ---- builder: compile the app ----
 FROM node:22-alpine AS builder
