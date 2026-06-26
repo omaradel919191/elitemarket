@@ -1,6 +1,7 @@
 import type { MetadataRoute } from "next";
 import { SITE, CATEGORIES } from "@/lib/site";
 import { getAllProducts } from "@/lib/catalog";
+import { getPublishedPosts } from "@/lib/blog";
 
 /**
  * Sitemap with en/ar alternates. Both locales are prefixed (/en, /ar) under
@@ -23,6 +24,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     "/terms",
     ...CATEGORIES.map((c) => `/category/${c.slug}`),
     ...getAllProducts().map((p) => `/product/${p.slug}`),
+    ...getPublishedPosts().map((p) => `/blog/${p.slug}`),
   ];
 
   return paths.map((path) => {

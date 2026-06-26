@@ -6,6 +6,7 @@ import {
   ShoppingBag,
   Tag,
   BarChart3,
+  Newspaper,
   ExternalLink,
   LogOut,
 } from "lucide-react";
@@ -19,6 +20,7 @@ const NAV = [
   { href: "/admin/orders", label: "Orders", Icon: ShoppingBag },
   { href: "/admin/analytics", label: "Analytics", Icon: BarChart3 },
   { href: "/admin/coupons", label: "Discount codes", Icon: Tag },
+  { href: "/admin/posts", label: "Journal", Icon: Newspaper },
 ];
 
 export function AdminShell({
