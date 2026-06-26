@@ -134,17 +134,32 @@ export async function POST(req: NextRequest) {
 
   // Hand to the courier (best-effort; never fails the webhook).
   if (isOtoConfigured()) {
-    const r = await createShipment(order);
-    updateOrder(order.id, {
-      status: r.ok ? "shipped" : "shipping_failed",
-      shipping: {
-        provider: "oto",
-        ref: r.ref ?? null,
-        trackingNumber: r.trackingNumber ?? null,
-        label: r.label ?? null,
-        error: r.ok ? null : r.error ?? "shipment failed",
-      },
-    });
+    if (!customer.city?.trim()) {
+      // No city to ship to — capture exactly what Stripe sent so we can see
+      // where the address actually lives, instead of failing blind at OTO.
+      const debug = JSON.stringify({
+        pi_shipping: piShipping?.address ?? null,
+        collected: sx.collected_information?.shipping_details?.address ?? null,
+        session_shipping: sx.shipping_details?.address ?? null,
+        billing: details?.address ?? null,
+      }).slice(0, 500);
+      updateOrder(order.id, {
+        status: "shipping_failed",
+        shipping: { provider: "oto", error: `No city captured. STRIPE_ADDR=${debug}` },
+      });
+    } else {
+      const r = await createShipment(order);
+      updateOrder(order.id, {
+        status: r.ok ? "shipped" : "shipping_failed",
+        shipping: {
+          provider: "oto",
+          ref: r.ref ?? null,
+          trackingNumber: r.trackingNumber ?? null,
+          label: r.label ?? null,
+          error: r.ok ? null : r.error ?? "shipment failed",
+        },
+      });
+    }
   }
 
   return NextResponse.json({ received: true });
