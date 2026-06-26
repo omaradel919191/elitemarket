@@ -43,7 +43,10 @@ export type Product = {
   nameAr: string;
   blurb: string;
   blurbAr: string;
+  /** Primary/cover image. */
   image: string;
+  /** Additional gallery images (cover excluded). */
+  images?: string[];
   rating?: number | null;
   priceAed?: number | null;
   /** Own products: units in stock. null/undefined = not tracked (always in stock). */
@@ -87,6 +90,7 @@ export function normalizeProduct(p: Partial<Product> & { slug: string }): Produc
     source: p.source === "own" ? "own" : "affiliate",
     audience:
       p.audience === "men" || p.audience === "women" ? p.audience : "unisex",
+    images: Array.isArray(p.images) ? p.images.filter(Boolean) : [],
     links: Array.isArray(p.links) ? p.links : [],
   } as Product;
 }
@@ -109,6 +113,13 @@ export function isBuyable(p: Product): boolean {
 /** Own product that is configured but out of stock. */
 export function isSoldOut(p: Product): boolean {
   return p.source === "own" && typeof p.stock === "number" && p.stock <= 0;
+}
+
+/** Cover + extra images, deduped, cover first. */
+export function galleryImages(p: Product): string[] {
+  return [p.image, ...(p.images ?? [])].filter(
+    (v, i, a) => !!v && a.indexOf(v) === i,
+  );
 }
 
 /** Pick the right-language fields for a product given the active locale. */

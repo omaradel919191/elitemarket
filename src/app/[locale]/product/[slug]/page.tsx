@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import Image from "next/image";
 import { notFound } from "next/navigation";
 import { Check, X, ChevronRight } from "lucide-react";
 import { setRequestLocale, getTranslations } from "next-intl/server";
@@ -9,9 +8,16 @@ import { Reveal } from "@/components/ui/reveal";
 import { Rating } from "@/components/shop/rating";
 import { BuyButtons } from "@/components/shop/buy-buttons";
 import { AddToCart } from "@/components/shop/add-to-cart";
+import { ProductGallery } from "@/components/shop/product-gallery";
 import { ProductGrid } from "@/components/shop/product-grid";
 import { JsonLd } from "@/components/seo/json-ld";
-import { getProduct, getRelated, localized, isOwn } from "@/lib/catalog";
+import {
+  getProduct,
+  getRelated,
+  localized,
+  isOwn,
+  galleryImages,
+} from "@/lib/catalog";
 import { SITE } from "@/lib/site";
 import { formatAED } from "@/lib/utils";
 
@@ -128,21 +134,11 @@ export default async function ProductPage({
         <div className="mt-8 grid gap-10 lg:grid-cols-2 lg:gap-14">
           {/* Gallery */}
           <Reveal>
-            <div className="relative aspect-square overflow-hidden rounded-3xl border border-line/70 bg-black">
-              <Image
-                src={product.image}
-                alt={l.name}
-                fill
-                priority
-                sizes="(max-width: 1024px) 100vw, 50vw"
-                className="object-contain p-10"
-              />
-              {badgeLabel && (
-                <span className="absolute top-5 rounded-full bg-gold px-3 py-1 text-xs font-semibold uppercase tracking-wide text-ink ltr:left-5 rtl:right-5">
-                  {badgeLabel}
-                </span>
-              )}
-            </div>
+            <ProductGallery
+              images={galleryImages(product)}
+              alt={l.name}
+              badge={badgeLabel}
+            />
           </Reveal>
 
           {/* Summary */}

@@ -16,6 +16,7 @@ import { AmbientGold } from "@/components/brand/ambient-gold";
 import { AssistantWidget } from "@/components/assistant/assistant-widget";
 import { WhatsAppButton } from "@/components/layout/whatsapp-button";
 import { JsonLd } from "@/components/seo/json-ld";
+import { Analytics } from "@/components/seo/analytics";
 import { SITE } from "@/lib/site";
 import { getActiveCategorySlugs } from "@/lib/catalog";
 import "../globals.css";
@@ -113,6 +114,10 @@ export default async function LocaleLayout({
       suppressHydrationWarning
     >
       <body className="flex min-h-dvh flex-col bg-ink text-chrome antialiased">
+        <Analytics
+          gaId={process.env.NEXT_PUBLIC_GA_ID?.trim()}
+          pixelId={process.env.NEXT_PUBLIC_META_PIXEL_ID?.trim()}
+        />
         <JsonLd
           data={{
             "@context": "https://schema.org",

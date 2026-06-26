@@ -83,6 +83,7 @@ export async function POST(req: NextRequest) {
     blurb: String(b.blurb ?? "").trim(),
     blurbAr: String(b.blurbAr ?? "").trim(),
     image: String(b.image ?? "/brand/products/perfume.png").trim(),
+    images: arr(b.images),
     rating: num(b.rating),
     priceAed: num(b.priceAed),
     deal: !!b.deal,

@@ -6,6 +6,7 @@ import { isStripeConfigured } from "@/lib/payments/stripe";
 import { isOtoConfigured } from "@/lib/shipping/oto";
 import { RetryShipmentButton } from "@/components/admin/retry-shipment-button";
 import { DeleteOrderButton } from "@/components/admin/delete-order-button";
+import { OrderStatusControl } from "@/components/admin/order-status-control";
 import { formatAED } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
@@ -13,6 +14,7 @@ export const dynamic = "force-dynamic";
 const STATUS: Record<OrderStatus, { label: string; cls: string }> = {
   paid: { label: "Paid", cls: "bg-gold/15 text-gold" },
   shipped: { label: "Shipped", cls: "bg-success/15 text-success" },
+  delivered: { label: "Delivered", cls: "bg-success/20 text-success" },
   shipping_failed: { label: "Shipping failed", cls: "bg-danger/15 text-danger" },
   cancelled: { label: "Cancelled", cls: "bg-line/60 text-ash-dim" },
 };
@@ -121,6 +123,9 @@ export default async function AdminOrdersPage() {
                         (o.status === "paid" || o.status === "shipping_failed") && (
                           <RetryShipmentButton orderId={o.id} />
                         )}
+                      <div>
+                        <OrderStatusControl orderId={o.id} current={o.status} />
+                      </div>
                     </td>
                     <td className="px-4 py-3 text-ash">
                       {o.shipping.trackingNumber ? (

@@ -48,6 +48,27 @@ export function ProductEditor({
     }
   }
 
+  async function uploadGalleryImage(file: File) {
+    setUploading(true);
+    setMsg("");
+    try {
+      const fd = new FormData();
+      fd.append("file", file);
+      const res = await fetch("/api/admin/upload-image", { method: "POST", body: fd });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "upload failed");
+      setF((prev) => ({ ...prev, images: [...prev.images, data.url] }));
+    } catch (e) {
+      setMsg(e instanceof Error ? e.message : "Upload failed");
+    } finally {
+      setUploading(false);
+    }
+  }
+
+  function removeGalleryImage(i: number) {
+    setF((prev) => ({ ...prev, images: prev.images.filter((_, idx) => idx !== i) }));
+  }
+
   const [f, setF] = useState({
     slug: product?.slug ?? "",
     source: product?.source ?? "own",
@@ -60,6 +81,7 @@ export function ProductEditor({
     blurb: product?.blurb ?? "",
     blurbAr: product?.blurbAr ?? "",
     image: product?.image ?? "/brand/products/perfume.png",
+    images: (product?.images ?? []) as string[],
     priceAed: product?.priceAed != null ? String(product.priceAed) : "",
     wasAed: product?.wasAed != null ? String(product.wasAed) : "",
     rating: product?.rating != null ? String(product.rating) : "",
@@ -193,6 +215,7 @@ export function ProductEditor({
           blurb: f.blurb,
           blurbAr: f.blurbAr,
           image: f.image,
+          images: f.images,
           priceAed: f.priceAed,
           wasAed: f.wasAed,
           rating: f.rating,
@@ -373,7 +396,7 @@ export function ProductEditor({
             <input className={field} value={f.slug} onChange={(e) => set("slug", e.target.value)} readOnly={mode === "edit"} placeholder="auto from name" />
           </div>
           <div className="sm:col-span-2">
-            <label className={lbl}>Image</label>
+            <label className={lbl}>Cover image</label>
             <div className="flex items-center gap-3">
               <span className="relative h-14 w-14 shrink-0 overflow-hidden rounded-lg border border-line bg-black">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -400,6 +423,45 @@ export function ProductEditor({
                 />
               </label>
             </div>
+          </div>
+          <div className="sm:col-span-2">
+            <label className={lbl}>Gallery (extra images)</label>
+            <div className="flex flex-wrap items-center gap-3">
+              {f.images.map((src, i) => (
+                <span
+                  key={src + i}
+                  className="relative h-16 w-16 overflow-hidden rounded-lg border border-line bg-black"
+                >
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={src} alt="" className="h-full w-full object-contain p-1" />
+                  <button
+                    type="button"
+                    onClick={() => removeGalleryImage(i)}
+                    aria-label="Remove"
+                    className="absolute right-0 top-0 flex h-5 w-5 items-center justify-center rounded-bl-lg bg-black/70 text-danger hover:bg-black"
+                  >
+                    <Trash2 className="h-3 w-3" />
+                  </button>
+                </span>
+              ))}
+              <label className="inline-flex h-16 w-16 shrink-0 cursor-pointer flex-col items-center justify-center gap-1 rounded-lg border border-dashed border-line text-xs text-ash transition-colors hover:border-gold/40 hover:text-gold">
+                <Upload className="h-4 w-4" />
+                Add
+                <input
+                  type="file"
+                  accept="image/png,image/jpeg,image/webp,image/avif"
+                  className="hidden"
+                  onChange={(e) => {
+                    const fl = e.target.files?.[0];
+                    if (fl) void uploadGalleryImage(fl);
+                    e.target.value = "";
+                  }}
+                />
+              </label>
+            </div>
+            <p className="mt-1.5 text-xs text-ash-dim">
+              Shown as thumbnails on the product page (cover stays first).
+            </p>
           </div>
           <div className="sm:col-span-2">
             <label className={lbl}>Short description (EN)</label>

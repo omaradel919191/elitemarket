@@ -5,6 +5,7 @@ import {
   Plus,
   ShoppingBag,
   Tag,
+  BarChart3,
   ExternalLink,
   LogOut,
 } from "lucide-react";
@@ -16,6 +17,7 @@ const NAV = [
   { href: "/admin/products", label: "Products", Icon: Package },
   { href: "/admin/products/new", label: "Add Product", Icon: Plus },
   { href: "/admin/orders", label: "Orders", Icon: ShoppingBag },
+  { href: "/admin/analytics", label: "Analytics", Icon: BarChart3 },
   { href: "/admin/coupons", label: "Discount codes", Icon: Tag },
 ];
 

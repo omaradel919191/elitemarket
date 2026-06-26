@@ -34,6 +34,7 @@ export type OrderStatus =
   | "paid" // payment captured, not yet shipped
   | "shipping_failed" // courier call failed — needs manual handling
   | "shipped" // courier accepted, AWB issued
+  | "delivered" // handed to the customer
   | "cancelled";
 
 export type Order = {
