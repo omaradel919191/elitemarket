@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { isAdmin } from "@/lib/admin-auth";
 import { updateOrder, type OrderStatus } from "@/lib/orders";
+import { sendStatusEmail } from "@/lib/email";
 
 const STATUSES: OrderStatus[] = [
   "paid",
@@ -28,6 +29,10 @@ export async function POST(req: NextRequest) {
   const updated = updateOrder(String(body.id), { status });
   if (!updated) {
     return NextResponse.json({ error: "order not found" }, { status: 404 });
+  }
+  // Notify the customer on shipped/delivered (best-effort; needs RESEND_API_KEY).
+  if (status === "shipped" || status === "delivered") {
+    await sendStatusEmail(updated, status);
   }
   return NextResponse.json({ ok: true });
 }

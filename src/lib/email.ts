@@ -90,6 +90,40 @@ async function send(
   }
 }
 
+function statusHtml(order: Order, status: "shipped" | "delivered"): string {
+  const shipped = status === "shipped";
+  const title = shipped ? "Your order is on its way 🚚" : "Your order was delivered ✅";
+  const intro = shipped
+    ? "Good news — your order has shipped and is on its way to you."
+    : "Your order has been delivered. We hope you love it!";
+  const track =
+    shipped && order.shipping.trackingNumber
+      ? `<p style="color:#94a3b8;font-size:13px">Tracking number: <b style="color:#cbd2da">${order.shipping.trackingNumber}</b></p>`
+      : "";
+  return shell(
+    title,
+    `<p style="color:#94a3b8;font-size:14px">${intro}</p>
+     <p style="color:#94a3b8;font-size:13px">Order reference: <b style="color:#cbd2da">${order.id.slice(-12)}</b></p>
+     ${track}
+     <table style="width:100%;border-top:1px solid #23262d;margin:16px 0;border-collapse:collapse">${rows(order)}</table>`,
+  );
+}
+
+/** Email the customer when an order is marked shipped or delivered. */
+export async function sendStatusEmail(
+  order: Order,
+  status: "shipped" | "delivered",
+): Promise<void> {
+  const key = process.env.RESEND_API_KEY;
+  if (!key || !order.customer.email) return;
+  const from = process.env.EMAIL_FROM || `Elite Market <orders@${SITE.domain}>`;
+  const subject =
+    status === "shipped"
+      ? "Your Elite Market order has shipped"
+      : "Your Elite Market order was delivered";
+  await send(key, from, order.customer.email, subject, statusHtml(order, status));
+}
+
 export async function sendOrderEmails(order: Order): Promise<void> {
   const key = process.env.RESEND_API_KEY;
   if (!key) return;
