@@ -50,6 +50,7 @@ export default async function CartPage({
               apply: t("apply"),
               discount: t("discount"),
               total: t("total"),
+              crossSell: t("crossSell"),
             }}
           />
         </Container>

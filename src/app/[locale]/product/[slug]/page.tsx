@@ -8,6 +8,8 @@ import { Reveal } from "@/components/ui/reveal";
 import { Rating } from "@/components/shop/rating";
 import { BuyButtons } from "@/components/shop/buy-buttons";
 import { AddToCart } from "@/components/shop/add-to-cart";
+import { NotifyRestock } from "@/components/shop/notify-restock";
+import { ShareButtons } from "@/components/shop/share-buttons";
 import { ProductGallery } from "@/components/shop/product-gallery";
 import { ProductGrid } from "@/components/shop/product-grid";
 import { JsonLd } from "@/components/seo/json-ld";
@@ -16,6 +18,7 @@ import {
   getRelated,
   localized,
   isOwn,
+  isSoldOut,
   galleryImages,
   hasVariants,
   displayPrice,
@@ -192,21 +195,41 @@ export default async function ProductPage({
               </p>
               {own ? (
                 <>
-                  <AddToCart
-                    product={product}
-                    locale={locale}
-                    labels={{
-                      add: t("addToCart"),
-                      added: t("added"),
-                      buyNow: t("buyNow"),
-                      soldOut: t("soldOut"),
-                      setup: t("checkoutSetup"),
-                      option: t("option"),
-                    }}
-                  />
+                  {isSoldOut(product) ? (
+                    <NotifyRestock
+                      slug={product.slug}
+                      labels={{
+                        title: t("notifyTitle"),
+                        text: t("notifyText"),
+                        placeholder: t("notifyPlaceholder"),
+                        button: t("notifyButton"),
+                        done: t("notifyDone"),
+                      }}
+                    />
+                  ) : (
+                    <AddToCart
+                      product={product}
+                      locale={locale}
+                      labels={{
+                        add: t("addToCart"),
+                        added: t("added"),
+                        buyNow: t("buyNow"),
+                        soldOut: t("soldOut"),
+                        setup: t("checkoutSetup"),
+                        option: t("option"),
+                      }}
+                    />
+                  )}
                   <p className="mt-3 text-xs leading-relaxed text-ash-dim">
                     {t("shipsNote")}
                   </p>
+                  <div className="mt-5">
+                    <ShareButtons
+                      url={`${SITE.url}${lp}/product/${product.slug}`}
+                      title={l.name}
+                      label={tn("share")}
+                    />
+                  </div>
                 </>
               ) : (
                 <>
@@ -221,6 +244,13 @@ export default async function ProductPage({
                   <p className="mt-3 text-xs leading-relaxed text-ash-dim">
                     {t("affiliateNote")}
                   </p>
+                  <div className="mt-5">
+                    <ShareButtons
+                      url={`${SITE.url}${lp}/product/${product.slug}`}
+                      title={l.name}
+                      label={tn("share")}
+                    />
+                  </div>
                 </>
               )}
             </div>

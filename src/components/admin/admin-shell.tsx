@@ -7,6 +7,7 @@ import {
   Tag,
   BarChart3,
   Newspaper,
+  BellRing,
   ExternalLink,
   LogOut,
 } from "lucide-react";
@@ -21,6 +22,7 @@ const NAV = [
   { href: "/admin/analytics", label: "Analytics", Icon: BarChart3 },
   { href: "/admin/coupons", label: "Discount codes", Icon: Tag },
   { href: "/admin/posts", label: "Journal", Icon: Newspaper },
+  { href: "/admin/restock", label: "Restock requests", Icon: BellRing },
 ];
 
 export function AdminShell({

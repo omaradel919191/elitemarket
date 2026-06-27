@@ -31,12 +31,14 @@ export function SiteFooter() {
         { href: "/about", label: t("about") },
         { href: "/contact", label: t("contact") },
         { href: "/blog", label: t("blog") },
-        { href: "/guides", label: t("guides") },
+        { href: "/track", label: t("track") },
       ],
     },
     {
-      title: t("legal"),
+      title: t("help"),
       links: [
+        { href: "/shipping", label: t("shipping") },
+        { href: "/faq", label: t("faq") },
         { href: "/affiliate-disclosure", label: t("disclosure") },
         { href: "/privacy", label: t("privacy") },
         { href: "/terms", label: t("terms") },

@@ -15,6 +15,7 @@
     "about": "About",
     "contact": "Contact",
     "cart": "Cart",
+    "share": "Share",
     "menu": "Menu",
     "close": "Close",
     "search": "Search products"
@@ -67,7 +68,8 @@
     "promo": "Discount code",
     "apply": "Apply",
     "discount": "Discount",
-    "total": "Total"
+    "total": "Total",
+    "crossSell": "You might also like"
   },
   "success": {
     "title": "Thank you!",
@@ -208,12 +210,66 @@
       { "h": "Intellectual property", "b": "The Elite Market name, brand and original content are ours. Product names and imagery belong to their respective owners." }
     ]
   },
+  "track": {
+    "eyebrow": "Order Status",
+    "title": "Track Your Order",
+    "subtitle": "Enter your order reference and email to see the latest status.",
+    "ref": "Order reference",
+    "email": "Email",
+    "button": "Track order",
+    "checking": "Checking…",
+    "notFound": "We couldn't find an order with those details. Double-check your reference and email.",
+    "placed": "Placed",
+    "items": "Items",
+    "total": "Total",
+    "tracking": "Tracking number",
+    "statuses": {
+      "paid": "Paid — preparing your order",
+      "shipped": "Shipped — on its way",
+      "delivered": "Delivered",
+      "shipping_failed": "Processing",
+      "cancelled": "Cancelled"
+    }
+  },
+  "shipping": {
+    "eyebrow": "Delivery & Returns",
+    "title": "Shipping & Returns",
+    "subtitle": "How your order reaches you, and how returns work.",
+    "updated": "Last updated: June 2026",
+    "intro": "For products we sell and ship ourselves, here is exactly what to expect. Affiliate purchases (Amazon, Noon) are governed by that retailer's own policies.",
+    "sections": [
+      { "h": "Where we ship", "b": "We ship across the United Arab Emirates. For other countries, contact us before ordering and we'll confirm availability." },
+      { "h": "Delivery time", "b": "Orders are processed within 1 business day and typically delivered in 2–4 business days via our courier partner. You'll receive a tracking number by email once your order ships." },
+      { "h": "Shipping fees", "b": "Any shipping fee is shown clearly at checkout before you pay. Some items or order values may qualify for free delivery." },
+      { "h": "Tracking your order", "b": "Use the tracking number in your shipping email, or visit our Track Order page with your order reference and email." },
+      { "h": "Returns & exchanges", "b": "If something isn't right, contact us within 7 days of delivery. Items should be unused and in their original packaging. We'll arrange a return or exchange and confirm any conditions." },
+      { "h": "Damaged or wrong item", "b": "If your item arrives damaged or incorrect, message us with your order number and a photo and we'll make it right quickly." }
+    ]
+  },
+  "faq": {
+    "eyebrow": "Help",
+    "title": "Frequently Asked Questions",
+    "subtitle": "Quick answers about ordering, shipping and authenticity.",
+    "updated": "",
+    "intro": "Can't find your answer? Reach us on WhatsApp or the contact page — we're happy to help.",
+    "items": [
+      { "q": "Are your products authentic?", "a": "Yes. Every product we sell is genuine. For items we link to Amazon or Noon, you buy directly from those trusted retailers." },
+      { "q": "How do I pay?", "a": "For our own products you pay securely by card at checkout, processed by Stripe. We never see or store your card details." },
+      { "q": "When will my order arrive?", "a": "Orders ship within 1 business day and usually arrive in 2–4 business days across the UAE. You'll get a tracking number by email." },
+      { "q": "How do I track my order?", "a": "Use the link in your shipping email, or our Track Order page with your order reference and the email you used." },
+      { "q": "Can I return an item?", "a": "Yes — contact us within 7 days of delivery. Items should be unused and in original packaging. See our Shipping & Returns page." },
+      { "q": "Do you ship outside the UAE?", "a": "We currently focus on the UAE. Contact us for other locations and we'll do our best to help." },
+      { "q": "Do prices include VAT?", "a": "Prices are shown in AED. Any applicable taxes and shipping are confirmed at checkout before payment." }
+    ]
+  },
   "home": {
     "categoriesTitle": "Three Worlds of Luxury",
     "categoriesSubtitle": "Every piece handpicked and reviewed — ours to ship, or linked to a retailer you already trust.",
     "explore": "Explore",
     "featuredTitle": "Editor's Selection",
     "featuredSubtitle": "The pieces our curators are obsessing over right now.",
+    "bestsellersTitle": "Bestsellers",
+    "bestsellersSubtitle": "What our customers love most.",
     "howTitle": "How Elite Market Works",
     "howSubtitle": "Some pieces we sell and ship ourselves; others we link to at the best price. Either way, you're covered.",
     "step1Title": "We Curate",
@@ -260,7 +316,12 @@
     "priceNote": "Indicative price — confirm the live price on the retailer's site.",
     "disclosureShort": "Affiliate link — we may earn a commission.",
     "affiliateNote": "We may earn a commission when you buy through these links, at no extra cost to you. We never process your payment — you check out securely on Amazon or Noon.",
-    "comingSoon": "Buy links coming soon"
+    "comingSoon": "Buy links coming soon",
+    "notifyTitle": "Out of stock",
+    "notifyText": "This piece is sold out. Leave your email and we'll let you know the moment it's back.",
+    "notifyPlaceholder": "Your email",
+    "notifyButton": "Notify me",
+    "notifyDone": "Done — we'll email you when it's back in stock."
   },
   "newsletter": {
     "title": "Join the Elite list",
@@ -274,6 +335,10 @@
     "explore": "Explore",
     "company": "Company",
     "legal": "Legal",
+    "help": "Help",
+    "shipping": "Shipping & Returns",
+    "faq": "FAQ",
+    "track": "Track Order",
     "about": "About",
     "contact": "Contact",
     "guides": "Buying Guides",

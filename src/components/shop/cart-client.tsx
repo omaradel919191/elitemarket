@@ -5,7 +5,8 @@ import Image from "next/image";
 import { Minus, Plus, Trash2, ShoppingBag, Lock } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import { useCart } from "@/lib/use-cart";
-import { localized, resolveUnit, type Product } from "@/lib/catalog-types";
+import { localized, resolveUnit, isBuyable, type Product } from "@/lib/catalog-types";
+import { ProductGrid } from "./product-grid";
 import { formatAED } from "@/lib/utils";
 
 export function CartClient({
@@ -30,6 +31,7 @@ export function CartClient({
     apply: string;
     discount: string;
     total: string;
+    crossSell: string;
   };
 }) {
   const { lines, setQty, remove, ready } = useCart();
@@ -53,6 +55,11 @@ export function CartClient({
   const subtotal = items.reduce((s, x) => s + (x.unit.priceAed ?? 0) * x.qty, 0);
   const discount = applied ? Math.min(applied.discountAed, subtotal) : 0;
   const total = Math.max(0, subtotal - discount);
+
+  const inCart = new Set(lines.map((l) => l.slug));
+  const suggestions = products
+    .filter((p) => isBuyable(p) && !inCart.has(p.slug))
+    .slice(0, 4);
 
   const orderLines = () =>
     items.map((x) => ({ slug: x.product.slug, qty: x.qty, variantId: x.variantId }));
@@ -128,6 +135,7 @@ export function CartClient({
     "flex h-9 w-9 items-center justify-center text-ash transition-colors hover:text-gold disabled:opacity-30";
 
   return (
+    <>
     <div className="grid gap-8 lg:grid-cols-3">
       <ul className="space-y-4 lg:col-span-2">
         {items.map(({ product, variantId, qty, unit }) => {
@@ -256,5 +264,17 @@ export function CartClient({
         </div>
       </div>
     </div>
+
+    {suggestions.length > 0 && (
+      <div className="mt-16">
+        <h2 className="font-display text-xl font-semibold text-chrome">
+          {labels.crossSell}
+        </h2>
+        <div className="mt-6">
+          <ProductGrid products={suggestions} locale={locale} />
+        </div>
+      </div>
+    )}
+    </>
   );
 }

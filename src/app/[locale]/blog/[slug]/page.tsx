@@ -6,6 +6,7 @@ import { setRequestLocale, getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { Container } from "@/components/ui/container";
 import { PostBody } from "@/components/blog/post-body";
+import { ShareButtons } from "@/components/shop/share-buttons";
 import { JsonLd } from "@/components/seo/json-ld";
 import { getPost, localizedPost } from "@/lib/blog";
 import { SITE } from "@/lib/site";
@@ -90,6 +91,14 @@ export default async function PostPage({
 
         <div className="mt-8">
           <PostBody body={l.body} dir={dir} />
+        </div>
+
+        <div className="mt-12 border-t border-line/60 pt-6">
+          <ShareButtons
+            url={`${SITE.url}/${locale}/blog/${post.slug}`}
+            title={l.title}
+            label={tn("share")}
+          />
         </div>
       </Container>
     </article>
