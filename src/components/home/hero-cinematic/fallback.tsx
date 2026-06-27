@@ -3,19 +3,36 @@ import { ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Container } from "@/components/ui/container";
 
-/** Static cinematic hero for reduced-motion users and small screens. */
-export function HeroPoster() {
+/**
+ * Hero for small screens and reduced-motion users. Mobile (video=true) gets a
+ * lightweight autoplay loop; reduced-motion users get the still image.
+ */
+export function HeroPoster({ video = false }: { video?: boolean }) {
   const t = useTranslations("hero");
 
   return (
     <section className="relative flex min-h-dvh items-center overflow-hidden bg-black">
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img
-        src="/brand/products/watch.png"
-        alt=""
-        aria-hidden
-        className="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-70"
-      />
+      {video ? (
+        <video
+          className="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-80"
+          src="/brand/videos/watch.mp4"
+          poster="/brand/products/watch.png"
+          autoPlay
+          muted
+          loop
+          playsInline
+          preload="auto"
+          aria-hidden
+        />
+      ) : (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src="/brand/products/watch.png"
+          alt=""
+          aria-hidden
+          className="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-70"
+        />
+      )}
       <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black via-black/65 to-black/30" />
       <div className="pointer-events-none absolute inset-0 ltr:bg-gradient-to-r rtl:bg-gradient-to-l from-black via-black/70 to-transparent" />
 

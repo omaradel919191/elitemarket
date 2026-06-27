@@ -12,7 +12,7 @@ export function HeroCinematic() {
   const tc = useTranslations("categories");
   const tm = useTranslations("home");
 
-  const [mode, setMode] = useState<"full" | "poster">("poster");
+  const [mode, setMode] = useState<"full" | "video" | "static">("static");
   const pinRef = useRef<HTMLDivElement>(null);
   const videoRefs = useRef<(HTMLVideoElement | null)[]>([]);
   const captionRefs = useRef<Record<string, HTMLDivElement | null>>({});
@@ -24,8 +24,9 @@ export function HeroCinematic() {
     if (typeof window === "undefined") return;
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const w = window.innerWidth || 1024;
-    if (reduce || w < 768) return;
-    setMode("full");
+    if (reduce) return; // reduced motion → keep the static poster
+    // Mobile gets a lightweight autoplay video; desktop the full cinematic.
+    setMode(w < 768 ? "video" : "full");
   }, []);
 
   // Pinned ScrollTrigger writes scroll progress.
@@ -123,7 +124,7 @@ export function HeroCinematic() {
     return () => cancelAnimationFrame(raf);
   }, [mode]);
 
-  if (mode === "poster") return <HeroPoster />;
+  if (mode !== "full") return <HeroPoster video={mode === "video"} />;
 
   const products = CLIPS.filter((c) => c.caption);
 
