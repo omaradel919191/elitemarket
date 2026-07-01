@@ -1,9 +1,13 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
+import { rateLimit, clientIp } from "@/lib/rate-limit";
 
 const schema = z.object({ email: z.string().email() });
 
 export async function POST(req: Request) {
+  if (!rateLimit(`newsletter:${clientIp(req.headers)}`, 15, 10 * 60_000).ok) {
+    return NextResponse.json({ ok: false }, { status: 429 });
+  }
   try {
     const parsed = schema.safeParse(await req.json());
     if (!parsed.success) {
