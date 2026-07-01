@@ -53,10 +53,8 @@ export async function POST(req: NextRequest) {
   try {
     event = stripe.webhooks.constructEvent(raw, sig, secret);
   } catch (e) {
-    return NextResponse.json(
-      { error: e instanceof Error ? e.message : "bad signature" },
-      { status: 400 },
-    );
+    console.error("stripe webhook signature verification failed:", e);
+    return NextResponse.json({ error: "bad signature" }, { status: 400 });
   }
 
   if (event.type !== "checkout.session.completed") {
@@ -148,17 +146,17 @@ export async function POST(req: NextRequest) {
   // Hand to the courier (best-effort; never fails the webhook).
   if (isOtoConfigured()) {
     if (!customer.city?.trim()) {
-      // No city to ship to — capture exactly what Stripe sent so we can see
-      // where the address actually lives, instead of failing blind at OTO.
-      const debug = JSON.stringify({
+      // No city to ship to. Log the raw Stripe address server-side for triage,
+      // but keep PII out of the persisted order record.
+      console.error(`order ${order.id}: no shipping city captured`, {
         pi_shipping: piShipping?.address ?? null,
         collected: sx.collected_information?.shipping_details?.address ?? null,
         session_shipping: sx.shipping_details?.address ?? null,
         billing: details?.address ?? null,
-      }).slice(0, 500);
+      });
       updateOrder(order.id, {
         status: "shipping_failed",
-        shipping: { provider: "oto", error: `No city captured. STRIPE_ADDR=${debug}` },
+        shipping: { provider: "oto", error: "No shipping city captured" },
       });
     } else {
       const r = await createShipment(order);

@@ -30,6 +30,18 @@ const nextConfig: NextConfig = {
             key: "Permissions-Policy",
             value: "camera=(), microphone=(), geolocation=()",
           },
+          {
+            key: "Strict-Transport-Security",
+            value: "max-age=63072000; includeSubDomains",
+          },
+          // Conservative CSP: locks framing, <base> and plugins/objects without
+          // restricting script/style/image sources, so it can't break the live
+          // store, the Stripe redirect or the analytics tags. Tighten to a
+          // nonce-based script-src once it can be verified against production.
+          {
+            key: "Content-Security-Policy",
+            value: "frame-ancestors 'self'; base-uri 'self'; object-src 'none'",
+          },
         ],
       },
     ];

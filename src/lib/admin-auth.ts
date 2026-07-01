@@ -1,5 +1,6 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
+import { createHash, timingSafeEqual } from "crypto";
 import { SignJWT, jwtVerify } from "jose";
 
 /**
@@ -13,18 +14,42 @@ const COOKIE = "em_admin";
 const DEV_PASSWORD = "elite-admin";
 const DEV_SECRET = "elite-market-dev-secret-change-me";
 
-const password = process.env.ADMIN_PASSWORD || DEV_PASSWORD;
-const secret = new TextEncoder().encode(
-  process.env.ADMIN_SESSION_SECRET || process.env.AUTH_SECRET || DEV_SECRET,
-);
+const isProd = process.env.NODE_ENV === "production";
+const configuredPassword = process.env.ADMIN_PASSWORD;
+const configuredSecret =
+  process.env.ADMIN_SESSION_SECRET || process.env.AUTH_SECRET;
+
+/**
+ * Fail closed: in production we never fall back to the shipped dev defaults.
+ * If either the password or the signing secret is missing, admin auth is
+ * disabled entirely (no login accepted, no session validated) rather than
+ * left open behind a publicly-known password/secret.
+ */
+const authDisabled = isProd && (!configuredPassword || !configuredSecret);
+
+const password = configuredPassword || DEV_PASSWORD;
+const secret = new TextEncoder().encode(configuredSecret || DEV_SECRET);
 
 /** True when no ADMIN_PASSWORD is configured (insecure dev default in use). */
 export function adminUsesDefaultPassword(): boolean {
-  return !process.env.ADMIN_PASSWORD;
+  return !configuredPassword;
+}
+
+/** True when admin auth is disabled because prod env vars are unset. */
+export function adminAuthDisabled(): boolean {
+  return authDisabled;
+}
+
+/** Constant-time, length-independent comparison of two secrets. */
+function safeEqual(a: string, b: string): boolean {
+  const ha = createHash("sha256").update(a).digest();
+  const hb = createHash("sha256").update(b).digest();
+  return timingSafeEqual(ha, hb);
 }
 
 export function checkPassword(input: string): boolean {
-  return input === password;
+  if (authDisabled) return false;
+  return safeEqual(input, password);
 }
 
 export async function createAdminSession(): Promise<void> {
@@ -49,6 +74,7 @@ export async function destroyAdminSession(): Promise<void> {
 }
 
 export async function isAdmin(): Promise<boolean> {
+  if (authDisabled) return false;
   const jar = await cookies();
   const token = jar.get(COOKIE)?.value;
   if (!token) return false;
