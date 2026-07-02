@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { ArrowRight, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { CLIPS, HERO_VH, heroProgress, band, smoothstep } from "./progress";
+import { CLIPS, HERO_VH, heroProgress, band, smoothstep, clamp01 } from "./progress";
 import { HeroPoster } from "./fallback";
 
 export function HeroCinematic() {
@@ -19,6 +19,20 @@ export function HeroCinematic() {
   const introRef = useRef<HTMLDivElement>(null);
   const cueRef = useRef<HTMLDivElement>(null);
   const finaleRef = useRef<HTMLDivElement>(null);
+  const filmsRef = useRef<HTMLDivElement>(null);
+  // Smoothed pointer offset from centre, in [-1, 1], for the 3D tilt.
+  const mouse = useRef({ x: 0, y: 0, tx: 0, ty: 0 });
+
+  // Pointer drives a subtle 3D parallax tilt on the film stage.
+  useEffect(() => {
+    if (mode !== "full") return;
+    const onMove = (e: PointerEvent) => {
+      mouse.current.tx = (e.clientX / window.innerWidth - 0.5) * 2;
+      mouse.current.ty = (e.clientY / window.innerHeight - 0.5) * 2;
+    };
+    window.addEventListener("pointermove", onMove, { passive: true });
+    return () => window.removeEventListener("pointermove", onMove);
+  }, [mode]);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -26,6 +40,8 @@ export function HeroCinematic() {
     const w = window.innerWidth || 1024;
     if (reduce) return; // reduced motion → keep the static poster
     // Mobile gets a lightweight autoplay video; desktop the full cinematic.
+    // One-time client feature-detection on mount — intentional.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setMode(w < 768 ? "video" : "full");
   }, []);
 
@@ -85,11 +101,27 @@ export function HeroCinematic() {
     const loop = () => {
       const p = heroProgress.value;
 
+      // Ease the pointer toward its target and tilt the whole film stage in 3D.
+      const m = mouse.current;
+      m.x += (m.tx - m.x) * 0.06;
+      m.y += (m.ty - m.y) * 0.06;
+      if (filmsRef.current) {
+        filmsRef.current.style.transform = `rotateY(${m.x * 4}deg) rotateX(${
+          -m.y * 3
+        }deg) scale(1.06)`;
+      }
+
       CLIPS.forEach((c, i) => {
         const o = band(p, c.in0, c.in1, c.out0, c.out1);
         const v = videoRefs.current[i];
         if (v) {
           v.style.opacity = String(o);
+          // Slow cinematic dolly across each clip's life adds real depth.
+          const lp = clamp01((p - c.in0) / (c.out1 - c.in0));
+          const scale = 1.16 - lp * 0.2;
+          v.style.transform = `translate3d(${(lp - 0.5) * 44}px, ${
+            (lp - 0.5) * -18
+          }px, 0) scale(${scale})`;
           if (o > 0.03) {
             if (v.paused) void v.play().catch(() => {});
           } else if (!v.paused) {
@@ -101,7 +133,9 @@ export function HeroCinematic() {
           if (cap) {
             const co = band(p, c.in1, c.in1 + 0.03, c.out0 - 0.03, c.out0);
             cap.style.opacity = String(co);
-            cap.style.transform = `translateY(${(1 - co) * 24}px)`;
+            cap.style.transform = `translateY(${(1 - co) * 40}px) scale(${
+              0.9 + co * 0.1
+            })`;
           }
         }
       });
@@ -138,23 +172,28 @@ export function HeroCinematic() {
       className="relative"
       aria-label="Elite Market cinematic product experience"
     >
-      <div className="sticky top-0 h-dvh w-full overflow-hidden bg-black">
-        {/* Films: products + dissolve transitions */}
-        {CLIPS.map((c, i) => (
-          <video
-            key={c.key}
-            ref={(el) => {
-              videoRefs.current[i] = el;
-            }}
-            className="absolute inset-0 h-full w-full object-cover opacity-0 will-change-[opacity]"
-            src={c.video}
-            poster={c.poster}
-            muted
-            loop
-            playsInline
-            preload={i < 2 ? "auto" : "metadata"}
-          />
-        ))}
+      <div className="sticky top-0 h-dvh w-full overflow-hidden bg-black [perspective:1400px]">
+        {/* Films: products with a 3D dolly + pointer-tilt stage */}
+        <div
+          ref={filmsRef}
+          className="absolute inset-0 [transform-style:preserve-3d] will-change-transform"
+        >
+          {CLIPS.map((c, i) => (
+            <video
+              key={c.key}
+              ref={(el) => {
+                videoRefs.current[i] = el;
+              }}
+              className="absolute inset-0 h-full w-full object-cover opacity-0 [will-change:opacity,transform]"
+              src={c.video}
+              poster={c.poster}
+              muted
+              loop
+              playsInline
+              preload={i < 2 ? "auto" : "metadata"}
+            />
+          ))}
+        </div>
 
         {/* Cinematic grading */}
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(80%_80%_at_50%_45%,transparent_45%,rgba(0,0,0,0.6)_100%)]" />
