@@ -12,6 +12,7 @@ Backs up the current catalog to /tmp before writing.
 Usage (on the server, from /opt/elitemarket):
     python3 scripts/merge-watches.py
 """
+import glob
 import json
 import os
 import subprocess
@@ -19,8 +20,17 @@ import sys
 
 CONTAINER = "elitemarket-prod-web"
 LIVE_PATH = "/app/content/products.json"
-NEW_FILE = os.path.join(os.path.dirname(__file__), "..", "content", "import", "watches.json")
+IMPORT_DIR = os.path.join(os.path.dirname(__file__), "..", "content", "import")
 BACKUP = "/tmp/products.backup.json"
+
+
+def load_new() -> list:
+    """Every content/import/*.json file, concatenated (deduped later by slug)."""
+    items: list = []
+    for path in sorted(glob.glob(os.path.join(IMPORT_DIR, "*.json"))):
+        with open(path, encoding="utf-8") as f:
+            items.extend(json.load(f))
+    return items
 
 
 def read_live() -> list:
@@ -49,8 +59,7 @@ def write_live(products: list) -> None:
 
 def main() -> None:
     live = read_live()
-    with open(NEW_FILE, encoding="utf-8") as f:
-        new = json.load(f)
+    new = load_new()
 
     with open(BACKUP, "w", encoding="utf-8") as f:
         json.dump(live, f, ensure_ascii=False, indent=1)
