@@ -122,11 +122,9 @@ export function HeroCinematic() {
           v.style.transform = `translate3d(${(lp - 0.5) * 44}px, ${
             (lp - 0.5) * -18
           }px, 0) scale(${scale})`;
-          if (o > 0.03) {
-            if (v.paused) void v.play().catch(() => {});
-          } else if (!v.paused) {
-            v.pause();
-          }
+          // Keep every clip playing — never pause or seek on scroll. Scroll
+          // only cross-fades opacity above, so there is no decode skip.
+          if (v.paused) void v.play().catch(() => {});
         }
         if (c.caption) {
           const cap = captionRefs.current[c.key];
@@ -190,7 +188,7 @@ export function HeroCinematic() {
               muted
               loop
               playsInline
-              preload={i < 2 ? "auto" : "metadata"}
+              preload="auto"
             />
           ))}
         </div>
