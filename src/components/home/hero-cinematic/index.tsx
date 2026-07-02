@@ -6,6 +6,7 @@ import { ArrowRight, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { CLIPS, HERO_VH, heroProgress, band, smoothstep, clamp01 } from "./progress";
 import { HeroPoster } from "./fallback";
+import { HeroExplosions } from "./explosions";
 
 export function HeroCinematic() {
   const t = useTranslations("hero");
@@ -192,6 +193,9 @@ export function HeroCinematic() {
             />
           ))}
         </div>
+
+        {/* Gold-particle explosions between products + the finale burst */}
+        <HeroExplosions />
 
         {/* Cinematic grading */}
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(80%_80%_at_50%_45%,transparent_45%,rgba(0,0,0,0.6)_100%)]" />
