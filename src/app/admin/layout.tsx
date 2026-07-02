@@ -20,6 +20,11 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
+// Admin routes are auth-gated: never prerender/cache them. Without this the
+// requireAdmin() redirect gets statically cached (s-maxage=1yr) and loops
+// against /admin/login for a signed-in user.
+export const dynamic = "force-dynamic";
+
 export default function AdminLayout({ children }: { children: ReactNode }) {
   return (
     <html
