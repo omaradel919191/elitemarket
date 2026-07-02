@@ -1,35 +1,38 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { heroProgress } from "./progress";
+import { heroProgress, clamp01, smoothstep } from "./progress";
 
 /**
- * Product-dissolve transitions. Each product's poster is sampled into ~1200
- * gold-tinted particles; at a hand-off the current product shatters into those
- * particles, they blast outward (peak at the mid-scroll), then converge into
- * the next product's particle shape before the next film fades in. The finale
- * disperses the last product to the page edges. Deterministic per scroll value
- * so it scrubs cleanly both ways; runs only on the desktop cinematic hero.
+ * Product-dissolve transitions. Each product's own poster is sampled into a
+ * cloud of ~2600 gold particles; at a hand-off the current product breaks up
+ * into that cloud and the particles RAIN DOWNWARD (gravity + drift), clearing
+ * the frame so the next product is revealed beneath them. The last product's
+ * particles fall and spread across the full width, settling as a gold-dust
+ * background for the finale. Deterministic per scroll value so it scrubs
+ * cleanly both ways; desktop cinematic hero only.
  */
-const GOLD = [235, 200, 130];
-const CAP = 1200;
+const GOLD = [240, 202, 120];
+const CAP = 2600;
 
 type Sample = { x: number; y: number; r: number; g: number; b: number };
 type Pt = {
-  ax: number; ay: number; bx: number; by: number;
-  dx: number; dy: number; r: number; g: number; b: number; sz: number;
+  ax: number; ay: number; r: number; g: number; b: number;
+  sz: number; vx: number; ph: number; fs: number;
 };
-type Trans = { tp: number; half: number; disperse: boolean; pts: Pt[] };
+type Trans = { tp: number; half: number; finale: boolean; pts: Pt[] };
 
 const IMAGES = [
   "/brand/products/watch.png",
   "/brand/products/perfume.png",
   "/brand/products/sunglasses.png",
 ];
+// One hand-off per product: it turns to particles that fall away, revealing
+// the next film. The last (0.90) rains down into the page background.
 const DEFS = [
-  { tp: 0.35, half: 0.075, src: 0, dst: 1 as number | null },
-  { tp: 0.65, half: 0.075, src: 1, dst: 2 as number | null },
-  { tp: 0.9, half: 0.1, src: 2, dst: null as number | null },
+  { tp: 0.35, half: 0.08, src: 0, finale: false },
+  { tp: 0.65, half: 0.08, src: 1, finale: false },
+  { tp: 0.9, half: 0.11, src: 2, finale: true },
 ];
 
 export function HeroExplosions() {
@@ -55,7 +58,7 @@ export function HeroExplosions() {
       return new Promise((res) => {
         const img = new Image();
         img.onload = () => {
-          const S = 150;
+          const S = 168;
           const c = document.createElement("canvas");
           c.width = S;
           c.height = S;
@@ -94,22 +97,23 @@ export function HeroExplosions() {
       if (cancelled) return;
       transitions = DEFS.map((d) => {
         const A = s[d.src];
-        const B = d.dst != null ? s[d.dst] : A;
-        const n = Math.min(CAP, A.length, B.length);
+        const n = Math.min(CAP, A.length);
         const pts: Pt[] = [];
         for (let i = 0; i < n; i++) {
           const a = A[i];
-          const b = B[i];
-          const ang = rand(0, Math.PI * 2);
-          const mag = rand(0.35, 1) * (d.dst == null ? 2.6 : 1);
           pts.push({
-            ax: a.x, ay: a.y, bx: b.x, by: b.y,
-            dx: Math.cos(ang) * mag, dy: Math.sin(ang) * mag,
-            r: (a.r + GOLD[0]) / 2, g: (a.g + GOLD[1]) / 2, b: (a.b + GOLD[2]) / 2,
-            sz: rand(1, 2.4),
+            ax: a.x, ay: a.y,
+            // Heavy gold tint so the shatter reads as gold, not the photo.
+            r: a.r * 0.35 + GOLD[0] * 0.65,
+            g: a.g * 0.35 + GOLD[1] * 0.65,
+            b: a.b * 0.35 + GOLD[2] * 0.65,
+            sz: rand(1, 2.6),
+            vx: rand(-1, 1),
+            ph: rand(0, Math.PI * 2),
+            fs: rand(0.8, 1.25),
           });
         }
-        return { tp: d.tp, half: d.half, disperse: d.dst == null, pts };
+        return { tp: d.tp, half: d.half, finale: d.finale, pts };
       });
       tick();
     });
@@ -130,26 +134,39 @@ export function HeroExplosions() {
       const p = heroProgress.value;
       ctx!.clearRect(0, 0, w, h);
       const cx = w / 2;
-      const cy = h * 0.46;
-      const size = Math.min(w, h) * 0.92;
-      const K = Math.min(w, h);
+      const cy = h * 0.44;
+      const size = Math.min(w, h) * 0.9;
 
       ctx!.globalCompositeOperation = "lighter";
       for (const tr of transitions) {
         const d = (p - tr.tp) / tr.half;
         if (d <= -1 || d >= 1) continue;
         const t = (d + 1) / 2; // 0 → 1 through the hand-off
-        const burst = Math.sin(t * Math.PI); // 0 at ends, 1 mid
-        const vis = Math.min(1, burst * 1.7 + 0.12);
+        const grav = t * t; // accelerating fall
+        const appear = smoothstep(0, 0.1, t);
         for (const pt of tr.pts) {
-          const bx = tr.disperse ? pt.ax + pt.dx * 2.2 : pt.bx;
-          const by = tr.disperse ? pt.ay + pt.dy * 2.2 : pt.by;
-          const lx = pt.ax + (bx - pt.ax) * t;
-          const ly = pt.ay + (by - pt.ay) * t;
-          const x = cx + lx * size + pt.dx * burst * K * 0.3;
-          const y = cy + ly * size + pt.dy * burst * K * 0.3;
-          const s = pt.sz * (1 + burst * 1.5);
-          ctx!.globalAlpha = vis * (tr.disperse ? 1 - t * 0.9 : 1);
+          const x0 = cx + pt.ax * size;
+          const y0 = cy + pt.ay * size;
+          let x: number;
+          let y: number;
+          let a: number;
+          let s: number;
+          if (tr.finale) {
+            // Rain down and fan out to fill the whole width; hold as gold dust
+            // behind the finale copy instead of clearing off-screen.
+            x = x0 + pt.vx * w * 0.6 * t + Math.sin(t * 5 + pt.ph) * 6;
+            y = y0 + grav * h * 0.82 * pt.fs;
+            a = appear * (0.42 + 0.32 * Math.sin(t * Math.PI));
+            s = pt.sz * (1 + grav * 0.4);
+          } else {
+            // Break up and fall straight past the bottom, revealing the next.
+            x = x0 + pt.vx * size * 0.22 * t + Math.sin(t * 7 + pt.ph) * 5;
+            y = y0 + grav * h * 1.2 * pt.fs;
+            a = appear * (1 - smoothstep(0.72, 1, t));
+            s = pt.sz * (1 + grav * 0.6);
+          }
+          if (a <= 0.01) continue;
+          ctx!.globalAlpha = clamp01(a);
           ctx!.fillStyle = `rgb(${pt.r | 0},${pt.g | 0},${pt.b | 0})`;
           ctx!.fillRect(x - s / 2, y - s / 2, s, s);
         }
