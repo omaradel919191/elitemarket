@@ -4,19 +4,32 @@ import { useEffect, useRef } from "react";
 import { heroProgress } from "./progress";
 
 /**
- * Gold-particle explosions layered over the film journey. Each burst is keyed
- * to a scroll position (a product hand-off); particles implode to a bright core
- * at the transition and blast outward as you scroll past — deterministic per
- * scroll value, so it reads the same scrubbing either way. The final burst
- * expands past the viewport so it "fills the whole page" in gold.
+ * Product-dissolve transitions. Each product's poster is sampled into ~1200
+ * gold-tinted particles; at a hand-off the current product shatters into those
+ * particles, they blast outward (peak at the mid-scroll), then converge into
+ * the next product's particle shape before the next film fades in. The finale
+ * disperses the last product to the page edges. Deterministic per scroll value
+ * so it scrubs cleanly both ways; runs only on the desktop cinematic hero.
  */
-type Burst = { tp: number; half: number; maxR: number; n: number };
-type Part = { ang: number; sp: number; sz: number };
+const GOLD = [235, 200, 130];
+const CAP = 1200;
 
-const BURSTS: Burst[] = [
-  { tp: 0.35, half: 0.09, maxR: 0.6, n: 130 }, // watch → perfume
-  { tp: 0.65, half: 0.09, maxR: 0.6, n: 130 }, // perfume → sunglasses
-  { tp: 0.9, half: 0.12, maxR: 1.5, n: 300 }, // finale — fills the page
+type Sample = { x: number; y: number; r: number; g: number; b: number };
+type Pt = {
+  ax: number; ay: number; bx: number; by: number;
+  dx: number; dy: number; r: number; g: number; b: number; sz: number;
+};
+type Trans = { tp: number; half: number; disperse: boolean; pts: Pt[] };
+
+const IMAGES = [
+  "/brand/products/watch.png",
+  "/brand/products/perfume.png",
+  "/brand/products/sunglasses.png",
+];
+const DEFS = [
+  { tp: 0.35, half: 0.075, src: 0, dst: 1 as number | null },
+  { tp: 0.65, half: 0.075, src: 1, dst: 2 as number | null },
+  { tp: 0.9, half: 0.1, src: 2, dst: null as number | null },
 ];
 
 export function HeroExplosions() {
@@ -30,30 +43,76 @@ export function HeroExplosions() {
     if (!ctx) return;
 
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const rand = (a: number, b: number) => a + Math.random() * (b - a);
     let w = 0;
     let h = 0;
+    let transitions: Trans[] = [];
+    let cancelled = false;
+    let raf = 0;
+    let running = true;
 
-    // Bright gold glow sprite for additive drawing.
-    const SPR = 48;
-    const sprite = document.createElement("canvas");
-    sprite.width = SPR;
-    sprite.height = SPR;
-    const sc = sprite.getContext("2d")!;
-    const g = sc.createRadialGradient(SPR / 2, SPR / 2, 0, SPR / 2, SPR / 2, SPR / 2);
-    g.addColorStop(0, "rgba(255,238,190,1)");
-    g.addColorStop(0.3, "rgba(232,197,122,0.6)");
-    g.addColorStop(1, "rgba(232,197,122,0)");
-    sc.fillStyle = g;
-    sc.fillRect(0, 0, SPR, SPR);
+    function loadSamples(url: string): Promise<Sample[]> {
+      return new Promise((res) => {
+        const img = new Image();
+        img.onload = () => {
+          const S = 150;
+          const c = document.createElement("canvas");
+          c.width = S;
+          c.height = S;
+          const x = c.getContext("2d")!;
+          const ar = img.width / img.height;
+          let dw = S;
+          let dh = S;
+          if (ar > 1) dh = S / ar;
+          else dw = S * ar;
+          x.drawImage(img, (S - dw) / 2, (S - dh) / 2, dw, dh);
+          const data = x.getImageData(0, 0, S, S).data;
+          const pts: Sample[] = [];
+          for (let yy = 0; yy < S; yy += 2) {
+            for (let xx = 0; xx < S; xx += 2) {
+              const i = (yy * S + xx) * 4;
+              if (data[i + 3] < 40) continue;
+              const r = data[i];
+              const g = data[i + 1];
+              const b = data[i + 2];
+              if (r + g + b < 45) continue; // skip near-black background
+              pts.push({ x: xx / S - 0.5, y: yy / S - 0.5, r, g, b });
+            }
+          }
+          for (let i = pts.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [pts[i], pts[j]] = [pts[j], pts[i]];
+          }
+          res(pts);
+        };
+        img.onerror = () => res([]);
+        img.src = url;
+      });
+    }
 
-    const rand = (a: number, b: number) => a + Math.random() * (b - a);
-    const parts: Part[][] = BURSTS.map((b) =>
-      Array.from({ length: b.n }, () => ({
-        ang: rand(0, Math.PI * 2),
-        sp: rand(0.3, 1),
-        sz: rand(1, 3.2),
-      })),
-    );
+    Promise.all(IMAGES.map(loadSamples)).then((s) => {
+      if (cancelled) return;
+      transitions = DEFS.map((d) => {
+        const A = s[d.src];
+        const B = d.dst != null ? s[d.dst] : A;
+        const n = Math.min(CAP, A.length, B.length);
+        const pts: Pt[] = [];
+        for (let i = 0; i < n; i++) {
+          const a = A[i];
+          const b = B[i];
+          const ang = rand(0, Math.PI * 2);
+          const mag = rand(0.35, 1) * (d.dst == null ? 2.6 : 1);
+          pts.push({
+            ax: a.x, ay: a.y, bx: b.x, by: b.y,
+            dx: Math.cos(ang) * mag, dy: Math.sin(ang) * mag,
+            r: (a.r + GOLD[0]) / 2, g: (a.g + GOLD[1]) / 2, b: (a.b + GOLD[2]) / 2,
+            sz: rand(1, 2.4),
+          });
+        }
+        return { tp: d.tp, half: d.half, disperse: d.dst == null, pts };
+      });
+      tick();
+    });
 
     function resize() {
       w = canvas!.clientWidth;
@@ -65,9 +124,6 @@ export function HeroExplosions() {
     resize();
     window.addEventListener("resize", resize);
 
-    let raf = 0;
-    let running = true;
-
     function frame() {
       raf = 0;
       if (!running) return;
@@ -75,24 +131,29 @@ export function HeroExplosions() {
       ctx!.clearRect(0, 0, w, h);
       const cx = w / 2;
       const cy = h * 0.46;
-      const diag = Math.hypot(w, h);
+      const size = Math.min(w, h) * 0.92;
+      const K = Math.min(w, h);
 
       ctx!.globalCompositeOperation = "lighter";
-      BURSTS.forEach((b, bi) => {
-        const local = Math.min(1, Math.abs((p - b.tp) / b.half));
-        const alpha = 1 - local; // bright at the transition, gone at the edges
-        if (alpha <= 0.002) return;
-        const rad = local * b.maxR * diag; // 0 at core → expands outward
-        const ps = parts[bi];
-        for (const pt of ps) {
-          const r = rad * pt.sp;
-          const x = cx + Math.cos(pt.ang) * r;
-          const y = cy + Math.sin(pt.ang) * r;
-          const s = pt.sz * (1 + local * 1.6);
-          ctx!.globalAlpha = Math.min(1, alpha * 1.1);
-          ctx!.drawImage(sprite, x - s * 3, y - s * 3, s * 6, s * 6);
+      for (const tr of transitions) {
+        const d = (p - tr.tp) / tr.half;
+        if (d <= -1 || d >= 1) continue;
+        const t = (d + 1) / 2; // 0 → 1 through the hand-off
+        const burst = Math.sin(t * Math.PI); // 0 at ends, 1 mid
+        const vis = Math.min(1, burst * 1.7 + 0.12);
+        for (const pt of tr.pts) {
+          const bx = tr.disperse ? pt.ax + pt.dx * 2.2 : pt.bx;
+          const by = tr.disperse ? pt.ay + pt.dy * 2.2 : pt.by;
+          const lx = pt.ax + (bx - pt.ax) * t;
+          const ly = pt.ay + (by - pt.ay) * t;
+          const x = cx + lx * size + pt.dx * burst * K * 0.3;
+          const y = cy + ly * size + pt.dy * burst * K * 0.3;
+          const s = pt.sz * (1 + burst * 1.5);
+          ctx!.globalAlpha = vis * (tr.disperse ? 1 - t * 0.9 : 1);
+          ctx!.fillStyle = `rgb(${pt.r | 0},${pt.g | 0},${pt.b | 0})`;
+          ctx!.fillRect(x - s / 2, y - s / 2, s, s);
         }
-      });
+      }
       ctx!.globalCompositeOperation = "source-over";
       ctx!.globalAlpha = 1;
       tick();
@@ -101,7 +162,6 @@ export function HeroExplosions() {
     function tick() {
       if (running && !raf) raf = requestAnimationFrame(frame);
     }
-    tick();
 
     const io = new IntersectionObserver(
       ([e]) => {
@@ -118,6 +178,7 @@ export function HeroExplosions() {
     document.addEventListener("visibilitychange", onVis);
 
     return () => {
+      cancelled = true;
       running = false;
       if (raf) cancelAnimationFrame(raf);
       window.removeEventListener("resize", resize);

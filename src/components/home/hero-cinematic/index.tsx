@@ -106,10 +106,21 @@ export function HeroCinematic() {
       const m = mouse.current;
       m.x += (m.tx - m.x) * 0.06;
       m.y += (m.ty - m.y) * 0.06;
+      // Dim + shrink the films during each particle hand-off (0.35/0.65/0.90)
+      // so the product visibly dissolves into the gold particles and the next
+      // one re-forms out of them, instead of a plain video crossfade.
+      let diss = 0;
+      for (const [tp, half] of [[0.35, 0.075], [0.65, 0.075], [0.9, 0.1]] as const) {
+        const d = Math.abs(p - tp) / half;
+        if (d < 1) diss = Math.max(diss, Math.sin((1 - d) * Math.PI * 0.5));
+      }
       if (filmsRef.current) {
+        const fade = 1 - diss * 0.82;
+        filmsRef.current.style.opacity = String(fade);
         filmsRef.current.style.transform = `rotateY(${m.x * 4}deg) rotateX(${
           -m.y * 3
-        }deg) scale(1.06)`;
+        }deg) scale(${(1.06 - diss * 0.08).toFixed(3)})`;
+        filmsRef.current.style.filter = `blur(${(diss * 6).toFixed(1)}px)`;
       }
 
       CLIPS.forEach((c, i) => {
