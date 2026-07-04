@@ -40,7 +40,8 @@ CATS = ("perfumes", "watches", "sunglasses")
 BADGES = ("best-pick", "luxury-deal", "editor-choice")
 AUDS = ("men", "women", "unisex")
 DELAY = 5          # base seconds between products (politeness)
-RETRIES = 3        # fetch attempts per product before marking pending
+RETRIES = 4        # fetch attempts per product before marking pending
+BLOCK_COOLDOWN = 25  # seconds to let the IP cool after a product is blocked
 
 
 # ---------- input ----------
@@ -216,12 +217,12 @@ def main() -> None:
             data = extract(fetch(asin))
             if data["title"] and data["images"]:
                 break
-            time.sleep(9)
+            time.sleep(8 * (att + 1))  # escalating back-off eases throttling
             data = None
         if not data:
             pending.append(asin)
             print(f"[{i}/{len(todo)}] {asin}  BLOCKED (will retry next run)", flush=True)
-            time.sleep(DELAY)
+            time.sleep(BLOCK_COOLDOWN)  # let the IP cool before the next fetch
             continue
         try:
             ai = ai_copy(key, data["title"], data["priceAed"], f"https://www.amazon.ae/dp/{asin}")
