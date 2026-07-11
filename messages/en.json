@@ -60,6 +60,16 @@
     "deal": "Deal",
     "count": "{count, plural, =0 {No products} one {# product} other {# products}}"
   },
+  "links": {
+    "title": "Shop Elite Market",
+    "subtitle": "Tap what you're looking for — watches, sunglasses & perfumes, shipped across the UAE or on Amazon.",
+    "searchPlaceholder": "Search for a product…",
+    "categories": "Shop by category",
+    "latest": "Just Added",
+    "browseAll": "Browse all products",
+    "whatsapp": "Chat on WhatsApp",
+    "follow": "Follow us"
+  },
   "filters": {
     "toggle": "Filters",
     "sortLabel": "Sort by",
