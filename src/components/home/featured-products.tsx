@@ -24,7 +24,7 @@ export function FeaturedProducts({ locale }: { locale: string }) {
   return (
     <section className="relative py-24 sm:py-28">
       <Container>
-        <SectionHeading title={t("featuredTitle")} subtitle={t("featuredSubtitle")} />
+        <SectionHeading title={t("popularTitle")} subtitle={t("popularSubtitle")} />
         <div className="mt-14">
           <ProductGrid products={featured} locale={locale} />
         </div>

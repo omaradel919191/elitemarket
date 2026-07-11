@@ -71,7 +71,7 @@ export function SiteHeader({ categories }: { categories: CategorySlug[] }) {
           <Link
             href="/search"
             aria-label={t("search")}
-            className="hidden h-9 w-9 items-center justify-center rounded-full text-ash transition-colors hover:text-gold sm:flex"
+            className="flex h-9 w-9 items-center justify-center rounded-full text-ash transition-colors hover:text-gold"
           >
             <Search className="h-[1.15rem] w-[1.15rem]" />
           </Link>
@@ -116,6 +116,14 @@ export function SiteHeader({ categories }: { categories: CategorySlug[] }) {
               </button>
             </Container>
             <nav className="mt-6 flex flex-col gap-1 px-6">
+              <Link
+                href="/search"
+                onClick={() => setOpen(false)}
+                className="mb-4 flex items-center gap-3 rounded-full border border-line bg-surface/50 px-5 py-3.5 text-ash"
+              >
+                <Search className="h-5 w-5 text-gold" />
+                <span className="text-base">{t("search")}</span>
+              </Link>
               {nav.map((link, i) => (
                 <motion.div
                   key={link.href}

@@ -403,7 +403,16 @@
     "valueBilingualBody": "A native experience in both.",
     "ctaTitle": "Your next signature piece is waiting.",
     "ctaBody": "Browse the full collection of curated luxury across perfumes, watches and sunglasses.",
-    "ctaButton": "Explore the Collection"
+    "ctaButton": "Explore the Collection",
+    "searchPlaceholder": "Search watches, sunglasses, perfumes…",
+    "searchButton": "Search",
+    "shopAll": "Shop all",
+    "storyLink": "Watch the experience",
+    "heroTrust1": "Fast UAE delivery",
+    "heroTrust2": "Trusted retailers",
+    "heroTrust3": "Handpicked & reviewed",
+    "popularTitle": "Popular Right Now",
+    "popularSubtitle": "The pieces shoppers are loving — tap any to see details and buy."
   },
   "product": {
     "buyAmazon": "Buy on Amazon",
