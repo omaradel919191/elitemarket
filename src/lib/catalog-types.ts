@@ -106,6 +106,27 @@ export function normalizeProduct(p: Partial<Product> & { slug: string }): Produc
   } as Product;
 }
 
+/**
+ * Slim a product down to just what a listing card + the client-side filters
+ * need, dropping the heavy long-form arrays (pros/cons/features/bestFor and
+ * extra gallery images). Cuts the payload serialized to the client browser on
+ * listing pages with hundreds of products.
+ */
+export function toCardProduct(p: Product): Product {
+  return {
+    ...p,
+    images: [],
+    bestFor: "",
+    bestForAr: "",
+    pros: [],
+    prosAr: [],
+    cons: [],
+    consAr: [],
+    features: [],
+    featuresAr: [],
+  };
+}
+
 /** Own product (sold on-site). */
 export function isOwn(p: Product): boolean {
   return p.source === "own";

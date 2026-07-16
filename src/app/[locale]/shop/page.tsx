@@ -3,8 +3,9 @@ import { setRequestLocale, getTranslations } from "next-intl/server";
 import { Container } from "@/components/ui/container";
 import { PageHeader } from "@/components/ui/page-header";
 import { CategoryFilter } from "@/components/shop/category-filter";
-import { ProductGrid } from "@/components/shop/product-grid";
+import { ShopBrowser } from "@/components/shop/shop-browser";
 import { getAllProducts, getActiveCategorySlugs } from "@/lib/catalog";
+import { toCardProduct } from "@/lib/catalog-types";
 
 export const dynamic = "force-dynamic";
 
@@ -26,7 +27,7 @@ export default async function ShopPage({
   const { locale } = await params;
   setRequestLocale(locale);
   const t = await getTranslations("shop");
-  const products = getAllProducts();
+  const products = getAllProducts().map(toCardProduct);
   const activeCategories = getActiveCategorySlugs();
 
   return (
@@ -39,11 +40,8 @@ export default async function ShopPage({
       <section className="pb-28">
         <Container>
           <CategoryFilter categories={activeCategories} />
-          <p className="mt-6 text-sm text-ash-dim">
-            {t("count", { count: products.length })}
-          </p>
-          <div className="mt-6">
-            <ProductGrid products={products} locale={locale} />
+          <div className="mt-8">
+            <ShopBrowser products={products} locale={locale} />
           </div>
         </Container>
       </section>

@@ -1,11 +1,11 @@
 import { setRequestLocale } from "next-intl/server";
-import { HeroCinematic } from "@/components/home/hero-cinematic";
-import { CategoryShowcase } from "@/components/home/category-showcase";
+import { HeroSearch } from "@/components/home/hero-search";
 import { FeaturedProducts } from "@/components/home/featured-products";
-import { Bestsellers } from "@/components/home/bestsellers";
+import { CategoryShowcase } from "@/components/home/category-showcase";
 import { HowItWorks } from "@/components/home/how-it-works";
 import { ValueProps } from "@/components/home/value-props";
 import { CtaBand } from "@/components/home/cta-band";
+import { getActiveCategorySlugs } from "@/lib/catalog";
 
 export default async function HomePage({
   params,
@@ -14,13 +14,15 @@ export default async function HomePage({
 }) {
   const { locale } = await params;
   setRequestLocale(locale);
+  const categories = getActiveCategorySlugs();
 
   return (
     <>
-      <HeroCinematic />
-      <CategoryShowcase />
+      {/* Product-first: search + category shortcuts on the very first screen. */}
+      <HeroSearch categories={categories} />
+      {/* Real products immediately — the fastest path to a purchase. */}
       <FeaturedProducts locale={locale} />
-      <Bestsellers locale={locale} />
+      <CategoryShowcase />
       <HowItWorks />
       <ValueProps />
       <CtaBand />

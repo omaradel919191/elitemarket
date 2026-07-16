@@ -1,10 +1,24 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { getProduct, localized, isOwn } from "@/lib/catalog";
 import { recommend, catalogForPrompt } from "@/lib/assistant";
+import { rateLimit, clientIp } from "@/lib/rate-limit";
 
 type Turn = { role: "user" | "assistant"; content: string };
 
+const MAX_MESSAGE = 1000;
+const MAX_TURN = 2000;
+
 export async function POST(req: NextRequest) {
+  // Public, paid endpoint (calls Anthropic): cap abuse at 20 req/IP/5 min.
+  const ip = clientIp(req.headers);
+  const limited = rateLimit(`assistant:${ip}`, 20, 5 * 60_000);
+  if (!limited.ok) {
+    return NextResponse.json(
+      { error: "rate_limited" },
+      { status: 429, headers: { "Retry-After": String(limited.retryAfter) } },
+    );
+  }
+
   let body: { message?: string; locale?: string; history?: Turn[] };
   try {
     body = await req.json();
@@ -12,9 +26,16 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "bad request" }, { status: 400 });
   }
 
-  const message = (body.message ?? "").trim();
+  const message = (body.message ?? "").trim().slice(0, MAX_MESSAGE);
   const locale = body.locale === "ar" ? "ar" : "en";
-  const history = Array.isArray(body.history) ? body.history.slice(-6) : [];
+  const history = (Array.isArray(body.history) ? body.history.slice(-6) : [])
+    .filter(
+      (t): t is Turn =>
+        t != null &&
+        (t.role === "user" || t.role === "assistant") &&
+        typeof t.content === "string",
+    )
+    .map((t) => ({ role: t.role, content: t.content.slice(0, MAX_TURN) }));
   if (!message) {
     return NextResponse.json({ error: "empty" }, { status: 400 });
   }

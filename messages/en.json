@@ -39,9 +39,18 @@
     "statRetailers": "Trusted Retailers"
   },
   "categories": {
-    "perfumes": { "name": "Perfumes", "tagline": "Signature scents & niche houses" },
-    "watches": { "name": "Watches", "tagline": "Mechanical precision, timeless design" },
-    "sunglasses": { "name": "Sunglasses", "tagline": "Iconic frames, pure presence" }
+    "perfumes": {
+      "name": "Perfumes",
+      "tagline": "Signature scents & niche houses"
+    },
+    "watches": {
+      "name": "Watches",
+      "tagline": "Mechanical precision, timeless design"
+    },
+    "sunglasses": {
+      "name": "Sunglasses",
+      "tagline": "Iconic frames, pure presence"
+    }
   },
   "shop": {
     "title": "The Collection",
@@ -50,6 +59,52 @@
     "all": "All",
     "deal": "Deal",
     "count": "{count, plural, =0 {No products} one {# product} other {# products}}"
+  },
+  "links": {
+    "title": "Shop Elite Market",
+    "subtitle": "Tap what you're looking for — watches, sunglasses & perfumes, shipped across the UAE or on Amazon.",
+    "searchPlaceholder": "Search for a product…",
+    "categories": "Shop by category",
+    "latest": "Just Added",
+    "browseAll": "Browse all products",
+    "whatsapp": "Chat on WhatsApp",
+    "follow": "Follow us"
+  },
+  "filters": {
+    "toggle": "Filters",
+    "sortLabel": "Sort by",
+    "featured": "Featured",
+    "priceAsc": "Price: Low to High",
+    "priceDesc": "Price: High to Low",
+    "ratingSort": "Top Rated",
+    "nameAsc": "Name: A–Z",
+    "brandAsc": "Brand: A–Z",
+    "searchPlaceholder": "Search by name or brand…",
+    "brand": "Brand",
+    "brandSearch": "Search brands…",
+    "price": "Price (AED)",
+    "min": "Min",
+    "max": "Max",
+    "availability": "Availability",
+    "inStock": "In stock only",
+    "type": "Where to buy",
+    "typeAll": "All",
+    "typeOwn": "Our store",
+    "typeAffiliate": "Amazon",
+    "sale": "On sale only",
+    "rating": "Rating",
+    "ratingAny": "Any",
+    "rating3": "3★ & up",
+    "rating4": "4★ & up",
+    "highlight": "Highlight",
+    "clear": "Clear all",
+    "showAll": "Show all ({count})",
+    "showLess": "Show less",
+    "results": "{count, plural, =0 {No products} one {# product} other {# products}}",
+    "noMatch": "No products match your filters.",
+    "apply": "Show results",
+    "brandsSelected": "{count} selected",
+    "audienceLabel": "Audience"
   },
   "cart": {
     "eyebrow": "Your Bag",
@@ -190,10 +245,22 @@
     "updated": "Last updated: June 2026",
     "intro": "Elite Market respects your privacy. We collect as little data as possible and never sell it.",
     "sections": [
-      { "h": "What we collect", "b": "For orders of our own products we collect the name, address, phone and email needed to ship and confirm your order. Card details are entered on our payment provider's secure checkout (Stripe) and are never stored by us. We don't require accounts to browse. If you subscribe to our newsletter, we store the email you provide. We use privacy-respecting, aggregate analytics to understand which pages are useful." },
-      { "h": "Cookies", "b": "We use only essential cookies needed for the site to function and for language preference. We do not use intrusive advertising trackers." },
-      { "h": "Affiliate links", "b": "When you click a product link, the destination retailer (e.g. Amazon, Noon) may set its own cookies to attribute the referral. Their privacy policies govern that data once you leave our site." },
-      { "h": "Your choices", "b": "You can unsubscribe from the newsletter at any time using the link in any email. To request deletion of your email from our list, contact us." }
+      {
+        "h": "What we collect",
+        "b": "For orders of our own products we collect the name, address, phone and email needed to ship and confirm your order. Card details are entered on our payment provider's secure checkout (Stripe) and are never stored by us. We don't require accounts to browse. If you subscribe to our newsletter, we store the email you provide. We use privacy-respecting, aggregate analytics to understand which pages are useful."
+      },
+      {
+        "h": "Cookies",
+        "b": "We use only essential cookies needed for the site to function and for language preference. We do not use intrusive advertising trackers."
+      },
+      {
+        "h": "Affiliate links",
+        "b": "When you click a product link, the destination retailer (e.g. Amazon, Noon) may set its own cookies to attribute the referral. Their privacy policies govern that data once you leave our site."
+      },
+      {
+        "h": "Your choices",
+        "b": "You can unsubscribe from the newsletter at any time using the link in any email. To request deletion of your email from our list, contact us."
+      }
     ]
   },
   "terms": {
@@ -202,12 +269,30 @@
     "updated": "Last updated: June 2026",
     "intro": "By using Elite Market you agree to these terms.",
     "sections": [
-      { "h": "What we are", "b": "Elite Market is a curated luxury store. We sell and ship our own products, with payment processed securely by our provider (Stripe) and delivery handled by our courier partner. For some items we instead link to third-party retailers (e.g. Amazon, Noon), where the purchase is completed on their site." },
-      { "h": "Orders, shipping & returns", "b": "For our own products, your order is confirmed after payment and shipped to the address you provide. Delivery times, shipping fees and any return or exchange terms are shown at checkout or on request. Affiliate purchases are governed by the retailer's own terms." },
-      { "h": "Affiliate links", "b": "Some links on this site are affiliate links to other retailers. We may earn a commission on qualifying purchases at no extra cost to you. See our Affiliate Disclosure for details." },
-      { "h": "Accuracy", "b": "We work to keep product information accurate, but prices, availability and specifications are set by the retailers and can change at any time. Always confirm details on the retailer's site before buying." },
-      { "h": "No warranty", "b": "Content on Elite Market is provided for information only and without warranty. Any purchase, and any product warranty or return, is solely between you and the retailer." },
-      { "h": "Intellectual property", "b": "The Elite Market name, brand and original content are ours. Product names and imagery belong to their respective owners." }
+      {
+        "h": "What we are",
+        "b": "Elite Market is a curated luxury store. We sell and ship our own products, with payment processed securely by our provider (Stripe) and delivery handled by our courier partner. For some items we instead link to third-party retailers (e.g. Amazon, Noon), where the purchase is completed on their site."
+      },
+      {
+        "h": "Orders, shipping & returns",
+        "b": "For our own products, your order is confirmed after payment and shipped to the address you provide. Delivery times, shipping fees and any return or exchange terms are shown at checkout or on request. Affiliate purchases are governed by the retailer's own terms."
+      },
+      {
+        "h": "Affiliate links",
+        "b": "Some links on this site are affiliate links to other retailers. We may earn a commission on qualifying purchases at no extra cost to you. See our Affiliate Disclosure for details."
+      },
+      {
+        "h": "Accuracy",
+        "b": "We work to keep product information accurate, but prices, availability and specifications are set by the retailers and can change at any time. Always confirm details on the retailer's site before buying."
+      },
+      {
+        "h": "No warranty",
+        "b": "Content on Elite Market is provided for information only and without warranty. Any purchase, and any product warranty or return, is solely between you and the retailer."
+      },
+      {
+        "h": "Intellectual property",
+        "b": "The Elite Market name, brand and original content are ours. Product names and imagery belong to their respective owners."
+      }
     ]
   },
   "track": {
@@ -238,12 +323,30 @@
     "updated": "Last updated: June 2026",
     "intro": "For products we sell and ship ourselves, here is exactly what to expect. Affiliate purchases (Amazon, Noon) are governed by that retailer's own policies.",
     "sections": [
-      { "h": "Where we ship", "b": "We ship across the United Arab Emirates. For other countries, contact us before ordering and we'll confirm availability." },
-      { "h": "Delivery time", "b": "Orders are processed within 1 business day and typically delivered in 2–4 business days via our courier partner. You'll receive a tracking number by email once your order ships." },
-      { "h": "Shipping fees", "b": "Any shipping fee is shown clearly at checkout before you pay. Some items or order values may qualify for free delivery." },
-      { "h": "Tracking your order", "b": "Use the tracking number in your shipping email, or visit our Track Order page with your order reference and email." },
-      { "h": "Returns & exchanges", "b": "If something isn't right, contact us within 7 days of delivery. Items should be unused and in their original packaging. We'll arrange a return or exchange and confirm any conditions." },
-      { "h": "Damaged or wrong item", "b": "If your item arrives damaged or incorrect, message us with your order number and a photo and we'll make it right quickly." }
+      {
+        "h": "Where we ship",
+        "b": "We ship across the United Arab Emirates. For other countries, contact us before ordering and we'll confirm availability."
+      },
+      {
+        "h": "Delivery time",
+        "b": "Orders are processed within 1 business day and typically delivered in 2–4 business days via our courier partner. You'll receive a tracking number by email once your order ships."
+      },
+      {
+        "h": "Shipping fees",
+        "b": "Any shipping fee is shown clearly at checkout before you pay. Some items or order values may qualify for free delivery."
+      },
+      {
+        "h": "Tracking your order",
+        "b": "Use the tracking number in your shipping email, or visit our Track Order page with your order reference and email."
+      },
+      {
+        "h": "Returns & exchanges",
+        "b": "If something isn't right, contact us within 7 days of delivery. Items should be unused and in their original packaging. We'll arrange a return or exchange and confirm any conditions."
+      },
+      {
+        "h": "Damaged or wrong item",
+        "b": "If your item arrives damaged or incorrect, message us with your order number and a photo and we'll make it right quickly."
+      }
     ]
   },
   "faq": {
@@ -253,13 +356,34 @@
     "updated": "",
     "intro": "Can't find your answer? Reach us on WhatsApp or the contact page — we're happy to help.",
     "items": [
-      { "q": "Are your products authentic?", "a": "Yes. Every product we sell is genuine. For items we link to Amazon or Noon, you buy directly from those trusted retailers." },
-      { "q": "How do I pay?", "a": "For our own products you pay securely by card at checkout, processed by Stripe. We never see or store your card details." },
-      { "q": "When will my order arrive?", "a": "Orders ship within 1 business day and usually arrive in 2–4 business days across the UAE. You'll get a tracking number by email." },
-      { "q": "How do I track my order?", "a": "Use the link in your shipping email, or our Track Order page with your order reference and the email you used." },
-      { "q": "Can I return an item?", "a": "Yes — contact us within 7 days of delivery. Items should be unused and in original packaging. See our Shipping & Returns page." },
-      { "q": "Do you ship outside the UAE?", "a": "We currently focus on the UAE. Contact us for other locations and we'll do our best to help." },
-      { "q": "Do prices include VAT?", "a": "Prices are shown in AED. Any applicable taxes and shipping are confirmed at checkout before payment." }
+      {
+        "q": "Are your products authentic?",
+        "a": "Yes. Every product we sell is genuine. For items we link to Amazon or Noon, you buy directly from those trusted retailers."
+      },
+      {
+        "q": "How do I pay?",
+        "a": "For our own products you pay securely by card at checkout, processed by Stripe. We never see or store your card details."
+      },
+      {
+        "q": "When will my order arrive?",
+        "a": "Orders ship within 1 business day and usually arrive in 2–4 business days across the UAE. You'll get a tracking number by email."
+      },
+      {
+        "q": "How do I track my order?",
+        "a": "Use the link in your shipping email, or our Track Order page with your order reference and the email you used."
+      },
+      {
+        "q": "Can I return an item?",
+        "a": "Yes — contact us within 7 days of delivery. Items should be unused and in original packaging. See our Shipping & Returns page."
+      },
+      {
+        "q": "Do you ship outside the UAE?",
+        "a": "We currently focus on the UAE. Contact us for other locations and we'll do our best to help."
+      },
+      {
+        "q": "Do prices include VAT?",
+        "a": "Prices are shown in AED. Any applicable taxes and shipping are confirmed at checkout before payment."
+      }
     ]
   },
   "home": {
@@ -289,7 +413,16 @@
     "valueBilingualBody": "A native experience in both.",
     "ctaTitle": "Your next signature piece is waiting.",
     "ctaBody": "Browse the full collection of curated luxury across perfumes, watches and sunglasses.",
-    "ctaButton": "Explore the Collection"
+    "ctaButton": "Explore the Collection",
+    "searchPlaceholder": "Search watches, sunglasses, perfumes…",
+    "searchButton": "Search",
+    "shopAll": "Shop all",
+    "storyLink": "Watch the experience",
+    "heroTrust1": "Fast UAE delivery",
+    "heroTrust2": "Trusted retailers",
+    "heroTrust3": "Handpicked & reviewed",
+    "popularTitle": "Popular Right Now",
+    "popularSubtitle": "The pieces shoppers are loving — tap any to see details and buy."
   },
   "product": {
     "buyAmazon": "Buy on Amazon",

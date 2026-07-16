@@ -1,4 +1,5 @@
 import { NextResponse, type NextRequest } from "next/server";
+import { lookup } from "dns/promises";
 import { isAdmin } from "@/lib/admin-auth";
 import type { Badge } from "@/lib/catalog-types";
 import { CATEGORIES, type CategorySlug } from "@/lib/site";
@@ -64,6 +65,53 @@ function jsonLd(html: string): Record<string, unknown>[] {
   return out;
 }
 
+/** True for loopback / private / link-local / unique-local IPs (SSRF targets). */
+function isPrivateIp(ip: string): boolean {
+  if (ip.includes(":")) {
+    const v = ip.toLowerCase();
+    return (
+      v === "::1" ||
+      v === "::" ||
+      v.startsWith("fc") ||
+      v.startsWith("fd") ||
+      v.startsWith("fe80") ||
+      v.startsWith("::ffff:") // IPv4-mapped — caller re-checks the v4 part
+    );
+  }
+  const p = ip.split(".").map(Number);
+  if (p.length !== 4 || p.some((n) => Number.isNaN(n))) return true;
+  const [a, b] = p;
+  return (
+    a === 10 ||
+    a === 127 ||
+    a === 0 ||
+    (a === 172 && b >= 16 && b <= 31) ||
+    (a === 192 && b === 168) ||
+    (a === 169 && b === 254) || // link-local + cloud metadata (169.254.169.254)
+    a >= 224 // multicast / reserved
+  );
+}
+
+/**
+ * Reject non-public fetch targets before scraping. Admin-gated, but a forged or
+ * misused call could otherwise probe internal services (n8n, DB, cloud metadata).
+ */
+async function assertPublicUrl(raw: string): Promise<void> {
+  const u = new URL(raw);
+  if (u.protocol !== "http:" && u.protocol !== "https:") {
+    throw new Error("unsupported protocol");
+  }
+  const host = u.hostname.toLowerCase().replace(/^\[|\]$/g, "");
+  if (host === "localhost" || host.endsWith(".local") || host.endsWith(".internal")) {
+    throw new Error("blocked host");
+  }
+  const { address } = await lookup(host);
+  const mapped = address.toLowerCase().startsWith("::ffff:")
+    ? address.slice(7)
+    : address;
+  if (isPrivateIp(mapped)) throw new Error("blocked address");
+}
+
 function guessCategory(text: string): CategorySlug {
   const t = text.toLowerCase();
   for (const c of Object.keys(CAT_KEYWORDS) as CategorySlug[]) {
@@ -85,6 +133,14 @@ export async function POST(req: NextRequest) {
   const url = (body.url ?? "").trim();
   if (!/^https?:\/\//i.test(url)) {
     return NextResponse.json({ error: "Enter a valid product URL" }, { status: 400 });
+  }
+  try {
+    await assertPublicUrl(url);
+  } catch {
+    return NextResponse.json(
+      { error: "That URL is not allowed" },
+      { status: 400 },
+    );
   }
 
   const host = (() => {

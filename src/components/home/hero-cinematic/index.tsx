@@ -4,8 +4,9 @@ import { useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { ArrowRight, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { CLIPS, HERO_VH, heroProgress, band, smoothstep } from "./progress";
+import { CLIPS, HERO_VH, heroProgress, band, smoothstep, clamp01 } from "./progress";
 import { HeroPoster } from "./fallback";
+import { HeroExplosions } from "./explosions";
 
 export function HeroCinematic() {
   const t = useTranslations("hero");
@@ -19,6 +20,20 @@ export function HeroCinematic() {
   const introRef = useRef<HTMLDivElement>(null);
   const cueRef = useRef<HTMLDivElement>(null);
   const finaleRef = useRef<HTMLDivElement>(null);
+  const filmsRef = useRef<HTMLDivElement>(null);
+  // Smoothed pointer offset from centre, in [-1, 1], for the 3D tilt.
+  const mouse = useRef({ x: 0, y: 0, tx: 0, ty: 0 });
+
+  // Pointer drives a subtle 3D parallax tilt on the film stage.
+  useEffect(() => {
+    if (mode !== "full") return;
+    const onMove = (e: PointerEvent) => {
+      mouse.current.tx = (e.clientX / window.innerWidth - 0.5) * 2;
+      mouse.current.ty = (e.clientY / window.innerHeight - 0.5) * 2;
+    };
+    window.addEventListener("pointermove", onMove, { passive: true });
+    return () => window.removeEventListener("pointermove", onMove);
+  }, [mode]);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -26,6 +41,8 @@ export function HeroCinematic() {
     const w = window.innerWidth || 1024;
     if (reduce) return; // reduced motion → keep the static poster
     // Mobile gets a lightweight autoplay video; desktop the full cinematic.
+    // One-time client feature-detection on mount — intentional.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setMode(w < 768 ? "video" : "full");
   }, []);
 
@@ -56,7 +73,10 @@ export function HeroCinematic() {
         trigger: pinRef.current,
         start: "top top",
         end: "bottom bottom",
-        scrub: true,
+        // Smoothed scrub (~0.8s catch-up) so scroll changes ease into the
+        // clip crossfades instead of snapping — this is what removes the
+        // video-decode "skip" you get with scrub:true.
+        scrub: 0.8,
         onUpdate: (self) => {
           heroProgress.value = self.progress;
         },
@@ -82,23 +102,50 @@ export function HeroCinematic() {
     const loop = () => {
       const p = heroProgress.value;
 
+      // Ease the pointer toward its target and tilt the whole film stage in 3D.
+      const m = mouse.current;
+      m.x += (m.tx - m.x) * 0.06;
+      m.y += (m.ty - m.y) * 0.06;
+      // A light dip on the film stage during each particle hand-off
+      // (0.35/0.65/0.90) sells the "product breaks into falling gold" moment
+      // without hiding the next product that's being revealed underneath.
+      let diss = 0;
+      for (const [tp, half] of [[0.35, 0.08], [0.65, 0.08], [0.9, 0.11]] as const) {
+        const d = Math.abs(p - tp) / half;
+        if (d < 1) diss = Math.max(diss, Math.sin((1 - d) * Math.PI * 0.5));
+      }
+      if (filmsRef.current) {
+        const fade = 1 - diss * 0.4;
+        filmsRef.current.style.opacity = String(fade);
+        filmsRef.current.style.transform = `rotateY(${m.x * 4}deg) rotateX(${
+          -m.y * 3
+        }deg) scale(${(1.06 - diss * 0.04).toFixed(3)})`;
+        filmsRef.current.style.filter = `blur(${(diss * 2.5).toFixed(1)}px)`;
+      }
+
       CLIPS.forEach((c, i) => {
         const o = band(p, c.in0, c.in1, c.out0, c.out1);
         const v = videoRefs.current[i];
         if (v) {
           v.style.opacity = String(o);
-          if (o > 0.03) {
-            if (v.paused) void v.play().catch(() => {});
-          } else if (!v.paused) {
-            v.pause();
-          }
+          // Slow cinematic dolly across each clip's life adds real depth.
+          const lp = clamp01((p - c.in0) / (c.out1 - c.in0));
+          const scale = 1.16 - lp * 0.2;
+          v.style.transform = `translate3d(${(lp - 0.5) * 44}px, ${
+            (lp - 0.5) * -18
+          }px, 0) scale(${scale})`;
+          // Keep every clip playing — never pause or seek on scroll. Scroll
+          // only cross-fades opacity above, so there is no decode skip.
+          if (v.paused) void v.play().catch(() => {});
         }
         if (c.caption) {
           const cap = captionRefs.current[c.key];
           if (cap) {
             const co = band(p, c.in1, c.in1 + 0.03, c.out0 - 0.03, c.out0);
             cap.style.opacity = String(co);
-            cap.style.transform = `translateY(${(1 - co) * 24}px)`;
+            cap.style.transform = `translateY(${(1 - co) * 40}px) scale(${
+              0.9 + co * 0.1
+            })`;
           }
         }
       });
@@ -135,23 +182,31 @@ export function HeroCinematic() {
       className="relative"
       aria-label="Elite Market cinematic product experience"
     >
-      <div className="sticky top-0 h-dvh w-full overflow-hidden bg-black">
-        {/* Films: products + dissolve transitions */}
-        {CLIPS.map((c, i) => (
-          <video
-            key={c.key}
-            ref={(el) => {
-              videoRefs.current[i] = el;
-            }}
-            className="absolute inset-0 h-full w-full object-cover opacity-0 will-change-[opacity]"
-            src={c.video}
-            poster={c.poster}
-            muted
-            loop
-            playsInline
-            preload={i === 0 ? "auto" : "none"}
-          />
-        ))}
+      <div className="sticky top-0 h-dvh w-full overflow-hidden bg-black [perspective:1400px]">
+        {/* Films: products with a 3D dolly + pointer-tilt stage */}
+        <div
+          ref={filmsRef}
+          className="absolute inset-0 [transform-style:preserve-3d] will-change-transform"
+        >
+          {CLIPS.map((c, i) => (
+            <video
+              key={c.key}
+              ref={(el) => {
+                videoRefs.current[i] = el;
+              }}
+              className="absolute inset-0 h-full w-full object-cover opacity-0 [will-change:opacity,transform]"
+              src={c.video}
+              poster={c.poster}
+              muted
+              loop
+              playsInline
+              preload="auto"
+            />
+          ))}
+        </div>
+
+        {/* Gold-particle explosions between products + the finale burst */}
+        <HeroExplosions />
 
         {/* Cinematic grading */}
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(80%_80%_at_50%_45%,transparent_45%,rgba(0,0,0,0.6)_100%)]" />
