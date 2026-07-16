@@ -3,7 +3,7 @@ import { ArrowUpRight } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import { Rating } from "./rating";
 import { WishlistButton } from "./wishlist-button";
-import { localized, displayPrice, hasVariants, type Product } from "@/lib/catalog-types";
+import { localized, publicPrice, hasVariants, type Product } from "@/lib/catalog-types";
 import { formatAED } from "@/lib/utils";
 
 export function ProductCard({
@@ -23,6 +23,7 @@ export function ProductCard({
 }) {
   const l = localized(product, locale);
   const tag = badgeLabel ?? (product.deal ? dealLabel : null);
+  const price = publicPrice(product);
 
   return (
     <Link
@@ -66,10 +67,10 @@ export function ProductCard({
             {product.rating != null && (
               <Rating value={product.rating} className="mb-2" />
             )}
-            {displayPrice(product) != null && (
+            {price != null ? (
               <div className="flex items-baseline gap-2">
                 <span className="font-display text-lg font-semibold text-chrome">
-                  {formatAED(displayPrice(product) as number, locale)}
+                  {formatAED(price, locale)}
                 </span>
                 {product.deal && product.wasAed != null && !hasVariants(product) && (
                   <span className="text-xs text-ash-dim line-through">
@@ -77,6 +78,10 @@ export function ProductCard({
                   </span>
                 )}
               </div>
+            ) : (
+              <span className="text-xs font-medium text-gold">
+                {locale === "ar" ? "شوف السعر على أمازون" : "See price on Amazon"}
+              </span>
             )}
           </div>
           <span className="flex h-9 w-9 items-center justify-center rounded-full border border-gold/30 text-gold transition-colors duration-300 group-hover:bg-gold group-hover:text-ink">

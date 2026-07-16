@@ -7,7 +7,7 @@ import { Container } from "@/components/ui/container";
 import { Button } from "@/components/ui/button";
 import { Rating } from "./rating";
 import { useWishlist } from "@/lib/use-wishlist";
-import { localized, type Product } from "@/lib/catalog-types";
+import { localized, publicPrice, type Product } from "@/lib/catalog-types";
 import { formatAED } from "@/lib/utils";
 
 export function CompareClient({ products: all }: { products: Product[] }) {
@@ -75,7 +75,11 @@ export function CompareClient({ products: all }: { products: Product[] }) {
                       {t("price")}
                     </dt>
                     <dd className="mt-0.5 font-display text-lg font-semibold text-chrome">
-                      {p.priceAed != null ? formatAED(p.priceAed, locale) : "—"}
+                      {publicPrice(p) != null
+                        ? formatAED(publicPrice(p) as number, locale)
+                        : locale === "ar"
+                          ? "على أمازون"
+                          : "On Amazon"}
                     </dd>
                   </div>
                   <div>

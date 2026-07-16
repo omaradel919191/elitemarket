@@ -21,7 +21,7 @@ import {
   isSoldOut,
   galleryImages,
   hasVariants,
-  displayPrice,
+  publicPrice,
 } from "@/lib/catalog";
 import { SITE } from "@/lib/site";
 import { formatAED } from "@/lib/utils";
@@ -61,7 +61,7 @@ export default async function ProductPage({
   const l = localized(product, locale);
   const own = isOwn(product);
   const variantProduct = own && hasVariants(product);
-  const priceToShow = displayPrice(product);
+  const priceToShow = publicPrice(product);
   const related = getRelated(product);
   const lp = `/${locale}`;
   const badgeLabel = product.badge
@@ -86,7 +86,7 @@ export default async function ProductPage({
         ratingCount: 1,
       },
     }),
-    ...(product.priceAed != null && {
+    ...(own && product.priceAed != null && {
       offers: {
         "@type": "AggregateOffer",
         priceCurrency: "AED",
@@ -176,9 +176,11 @@ export default async function ProductPage({
                 )}
               </div>
             )}
-            <p className="mt-1.5 text-xs text-ash-dim">
-              {own ? t("ownPriceNote") : t("priceNote")}
-            </p>
+            {own && (
+              <p className="mt-1.5 text-xs text-ash-dim">
+                {t("ownPriceNote")}
+              </p>
+            )}
 
             {l.bestFor && (
               <div className="mt-6 rounded-2xl border border-line/70 bg-surface/40 p-4">

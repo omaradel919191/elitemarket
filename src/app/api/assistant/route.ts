@@ -1,5 +1,5 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { getProduct, localized } from "@/lib/catalog";
+import { getProduct, localized, isOwn } from "@/lib/catalog";
 import { recommend, catalogForPrompt } from "@/lib/assistant";
 
 type Turn = { role: "user" | "assistant"; content: string };
@@ -68,7 +68,7 @@ export async function POST(req: NextRequest) {
         slug: p.slug,
         name: l.name,
         image: p.image,
-        priceAed: p.priceAed ?? null,
+        priceAed: isOwn(p) ? (p.priceAed ?? null) : null,
         category: p.category,
       };
     })

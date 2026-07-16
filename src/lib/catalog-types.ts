@@ -134,6 +134,16 @@ export function displayPrice(p: Product): number | null {
   return p.priceAed ?? null;
 }
 
+/**
+ * Price to display publicly on the site. Own products (we sell) show their
+ * fixed price. Affiliate products return null on purpose — we never print a
+ * hard price for them; the shopper sees the live price on Amazon/Noon via the
+ * out-link. Keeps us compliant with the Associates policy and never stale.
+ */
+export function publicPrice(p: Product): number | null {
+  return isOwn(p) ? displayPrice(p) : null;
+}
+
 /** Own product that can actually be added to cart right now. */
 export function isBuyable(p: Product): boolean {
   if (p.source !== "own") return false;
