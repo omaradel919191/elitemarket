@@ -10,6 +10,53 @@ stays the single source of truth for recent work across Cowork and Claude Code.
 
 ---
 
+## 2026-07-17 — Conversion redesign: product-first homepage, discovery & link-in-bio
+
+**Context / why**
+- Owner runs strong Instagram/TikTok ads with decent views but **near-zero
+  sales**. Diagnosis from the code: (1) the homepage was a 620vh cinematic
+  scroll with no products or search above the fold, (2) search was hidden on
+  mobile, (3) with hundreds of products there was no way to filter/sort. Decided
+  goal (confirmed with owner): **maximize Amazon-affiliate click-throughs**, and
+  make the homepage **product-first**.
+
+**What changed**
+- **Product-first homepage** (`src/app/[locale]/page.tsx`): now HeroSearch →
+  FeaturedProducts → CategoryShowcase → HowItWorks → ValueProps → CtaBand.
+  - New `src/components/home/hero-search.tsx`: search box + category chips +
+    trust row above the fold; search submits to `/shop?q=`.
+  - The full cinematic scroll experience moved to its own page,
+    `src/app/[locale]/story/page.tsx` (`/story`), so it's preserved, not lost.
+- **Link-in-bio page** (`src/app/[locale]/links/page.tsx`, `/links`): the single
+  URL to put in the IG/TikTok bio — brand, search, category shortcuts, and the
+  most-recently-added products (what's being advertised) surfaced first. Uses
+  `src/components/home/bio-search.tsx`.
+- **Shop filter + sort** (`src/components/shop/shop-browser.tsx`): comprehensive
+  client-side filtering (query, category, audience, brand, price range, sale,
+  in-stock, own/affiliate, rating) + sorting (featured / price / rating / name /
+  brand), state synced to the URL. Powers the collection and category pages.
+- **Admin filter + sort** (`src/components/admin/products-table.tsx`): search +
+  category/type/audience/deal filters and sortable columns on the admin list.
+- **Mobile search fix** (`src/components/layout/site-header.tsx`): the search
+  icon is always visible now (was `hidden sm:flex`) + a prominent search link at
+  the top of the mobile menu.
+- **Payload trim** (`toCardProduct` in `src/lib/catalog-types.ts`): listing
+  pages serialize a slimmed product (heavy pros/cons/features/gallery dropped)
+  to keep the client payload small with hundreds of products.
+- **Catalog growth**: batch-4 (68 watch ASINs) + batch-5 (186 sunglasses/perfume
+  ASINs) staged for the manual bulk import; `scripts/bulk-import.py` given
+  gentler, escalating back-off + a cooldown after Amazon blocks so a rate-limited
+  run can be re-run to pick up the remaining `pending` items.
+
+**Revisit / next step**
+- Marketing is now the bottleneck, not the site: put `…/links` in the IG/TikTok
+  bio. Possible follow-ups discussed: a "copy link" button / QR for stories, and
+  click tracking on the "See price on Amazon" out-links to measure ad performance.
+- Confirm the bulk import reached all 254 products (re-run `bulk-import.py` while
+  any `pending` remain — it's resumable).
+
+---
+
 ## 2026-07-17 — Apply "hide affiliate price" to the link-in-bio page
 
 **What changed**
