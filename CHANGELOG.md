@@ -4,6 +4,10 @@ Human-readable log of notable changes and the reasoning behind them, so any
 agent (Claude Code / Cowork) or teammate opening this repo understands recent
 work without re-deriving it from diffs.
 
+**Convention:** every work session that changes anything appends a dated
+`## YYYY-MM-DD — <title>` entry here (what changed, why, next step), so this file
+stays the single source of truth for recent work across Cowork and Claude Code.
+
 ---
 
 ## 2026-07-17 — Affiliate products: hide fixed price, show "See price on Amazon"
