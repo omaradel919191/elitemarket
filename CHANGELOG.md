@@ -10,6 +10,27 @@ stays the single source of truth for recent work across Cowork and Claude Code.
 
 ---
 
+## 2026-07-17 — Apply "hide affiliate price" to the link-in-bio page
+
+**What changed**
+- `/links` (link-in-bio) "Just Added" cards now use `publicPrice(p)` instead of
+  `displayPrice(p)`, so affiliate products show "شوف السعر على أمازون" /
+  "See price on Amazon" instead of a hard price — bringing this page in line
+  with the affiliate-price policy below (it had been missed).
+
+**Why**
+- The earlier "hide fixed price" pass updated the product page, product card,
+  compare and assistant, but not the newer `/links` page, so it was still
+  printing affiliate prices. This closes that gap.
+
+**Revisit / next step**
+- The `/shop` filter/sort still uses `displayPrice` for its price *range filter*
+  and price *sort* (it never displays the number). Left as-is for now since ~all
+  products are affiliate; revisit whether to hide those controls or scope them to
+  own products once there are more own products.
+
+---
+
 ## 2026-07-17 — Affiliate products: hide fixed price, show "See price on Amazon"
 
 **What changed**

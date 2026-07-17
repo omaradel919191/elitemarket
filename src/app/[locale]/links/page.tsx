@@ -11,7 +11,7 @@ import {
 } from "@/components/brand/social-icons";
 import { BioSearch } from "@/components/home/bio-search";
 import { getAllProducts, getActiveCategories } from "@/lib/catalog";
-import { localized, displayPrice, toCardProduct } from "@/lib/catalog-types";
+import { localized, publicPrice, toCardProduct } from "@/lib/catalog-types";
 import { formatAED } from "@/lib/utils";
 import { SITE } from "@/lib/site";
 
@@ -109,7 +109,7 @@ export default async function LinksPage({
           <div className="mt-3 space-y-2.5">
             {latest.map((p) => {
               const l = localized(p, locale);
-              const price = displayPrice(p);
+              const price = publicPrice(p);
               return (
                 <Link
                   key={p.slug}
@@ -132,9 +132,15 @@ export default async function LinksPage({
                     <span className="line-clamp-1 text-sm font-medium text-chrome">
                       {l.name}
                     </span>
-                    {price != null && (
+                    {price != null ? (
                       <span className="mt-0.5 block text-sm text-ash">
                         {formatAED(price, locale)}
+                      </span>
+                    ) : (
+                      <span className="mt-0.5 block text-xs font-medium text-gold">
+                        {locale === "ar"
+                          ? "شوف السعر على أمازون"
+                          : "See price on Amazon"}
                       </span>
                     )}
                   </span>
